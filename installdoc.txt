@@ -1,0 +1,22 @@
+Crear en git repositorio PlayArena
+
+frontend -- vite
+backend -- express
+
+crear fichero json para npm
+npm init -y
+
+crea proyecto en vite
+npm create vite@latest frontend
+    React
+    JavaScript
+
+cd frontend
+npm install
+npm run dev
+
+npm install @mui/material @emotion/react @emotion/styled
+
+ir a directorio principal \playarena
+    git init
+    

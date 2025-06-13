@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>3 en Raya - FlowLine Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 6fr;
+      height: 100vh;
+    }
+
+    .sidebar {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-right: 1px solid #ccc;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+    }
+
+    .sidebar label,
+    .sidebar select,
+    .sidebar button {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+
+    .cell {
+      background-color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .cell.disabled {
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .message {
+      font-size: 1.5em;
+      color: #2c7a2d;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Configuración</h2>
+
+    <label for="room">Sala:</label>
+    <select id="room">
+      <option>Sala 1</option>
+      <option>Sala 2</option>
+    </select>
+
+    <label for="game">Juego:</label>
+    <select id="game">
+      <option>3 en Raya</option>
+      <option>Otro Juego</option>
+    </select>
+
+    <label for="players">Jugador:</label>
+    <select id="players">
+      <option>Player1 vs Computer</option>
+      <option>Computer vs Player1</option>
+    </select>
+
+    <button onclick="startGame()">Comenzar</button>
+  </div>
+
+  <div class="main">
+    <div class="board" id="board"></div>
+    <div class="message" id="message">Haz clic para comenzar</div>
+  </div>
+
+  <script>
+    const boardElement = document.getElementById('board');
+    const messageElement = document.getElementById('message');
+    let board = [];
+    let gameActive = true;
+
+    const winningCombinations = [
+      [0,1,2], [3,4,5], [6,7,8], // filas
+      [0,3,6], [1,4,7], [2,5,8], // columnas
+      [0,4,8], [2,4,6]           // diagonales
+    ];
+
+    function startGame() {
+      board = Array(9).fill('');
+      gameActive = true;
+      messageElement.textContent = 'Tu turno (X)';
+      renderBoard();
+    }
+
+    function renderBoard() {
+      boardElement.innerHTML = '';
+      board.forEach((cell, index) => {
+        const div = document.createElement('div');
+        div.className = 'cell';
+        if (cell !== '') div.classList.add('disabled');
+        div.textContent = cell;
+        div.addEventListener('click', () => handleMove(index));
+        boardElement.appendChild(div);
+      });
+    }
+
+    function handleMove(index) {
+      if (!gameActive || board[index] !== '') return;
+
+      board[index] = 'X';
+      renderBoard();
+      if (checkWinner('X')) {
+        messageElement.textContent = '¡Player1 ha ganado!';
+        gameActive = false;
+        return;
+      }
+
+      if (board.every(cell => cell !== '')) {
+        messageElement.textContent = '¡Empate!';
+        gameActive = false;
+        return;
+      }
+
+      messageElement.textContent = 'Turno del Computer...';
+      setTimeout(() => {
+        computerMove();
+        renderBoard();
+        if (checkWinner('O')) {
+          messageElement.textContent = '¡Computer ha ganado!';
+          gameActive = false;
+        } else if (board.every(cell => cell !== '')) {
+          messageElement.textContent = '¡Empate!';
+          gameActive = false;
+        } else {
+          messageElement.textContent = 'Tu turno (X)';
+        }
+      }, 500);
+    }
+
+    function computerMove() {
+      let emptyIndices = board.map((cell, idx) => cell === '' ? idx : null).filter(i => i !== null);
+      if (emptyIndices.length === 0) return;
+      let choice = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      board[choice] = 'O';
+    }
+
+    function checkWinner(player) {
+      return winningCombinations.some(comb => 
+        comb.every(index => board[index] === player)
+      );
+    }
+
+    // Inicializa el juego al cargar
+    startGame();
+  </script>
+
+</body>
+</html>
