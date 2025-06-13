@@ -1,10 +1,8 @@
-Crear en git repositorio PlayArena
+CREAR EN GIT EL REPOSITORIO PlayArena
 
 frontend -- vite
 backend -- express
 
-crear fichero json para npm
-npm init -y
 
 crea proyecto en vite
 npm create vite@latest frontend
@@ -17,6 +15,16 @@ npm run dev
 
 npm install @mui/material @emotion/react @emotion/styled
 
+Sincronizar nuestro proyecto en local con github
 ir a directorio principal \playarena
     git init
+    git add .
+    git commit -m "first commit"
+    git remote add origin https://github.com/JasonRodriguezGarcia/PlayArena.git
+
+
+Estos comandos serán necesarios para empezar con el backend
+crear directorio backend
+crear fichero json para npm
+npm init -y
     
