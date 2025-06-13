@@ -21,6 +21,8 @@ ir a directorio principal \playarena
     git add .
     git commit -m "first commit"
     git remote add origin https://github.com/JasonRodriguezGarcia/PlayArena.git
+    git branch -M main
+    git push -u origin main
 
 
 Estos comandos serán necesarios para empezar con el backend
