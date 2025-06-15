@@ -14,7 +14,39 @@ import {
 } from '@mui/material';
 
 const PlayArena = () => {
-    const [board, setBoard] = useState(['', '', '', '', '', '', '', '', ''])
+    const [playerMark, setPlayerMark] = useState('X')
+    const [variables, setVariables] = useState([
+        {
+            element: "Config Column",
+            backgroundcolor: "#f5f5f5"
+        }, 
+        {
+            element: "Board Column",
+            backgroundcolor: "##339fff",
+            cellBackgroundcolor: "#e6f4ff",
+            opacity: 0.3
+        }  
+    ])
+// Tonos más oscuros similares a #e6f4ff:
+// Nombre	Hex	Descripción
+// Ligero	#cce8ff	Un poco más oscuro
+// Medio	#99d1ff	Azul cielo claro
+// Oscuro	#66baff	Azul moderado, más notorio
+// Más oscuro	#339fff	Azul brillante pero más intenso
+// Muy oscuro	#007acc	Azul profundo, aún legible
+
+    
+    const [board, setBoard] = useState([
+        {cellContent: '', disabled: false}, 
+        {cellContent: '', disabled: false}, 
+        {cellContent: '', disabled: false},
+        {cellContent: '', disabled: false},
+        {cellContent: '', disabled: false},
+        {cellContent: '', disabled: false},
+        {cellContent: '', disabled: false},
+        {cellContent: '', disabled: false},
+        {cellContent: '', disabled: false}
+    ])
     const [salas, setSalas] = useState(['Sala 1', 'Sala 2', 'Sala 3'])
     const [sala, setSala] = useState(salas[0])
     const [juegos, setJuegos] = useState(['3 en raya', 'Conecta 4', 'Hundir la flota'])
@@ -23,6 +55,9 @@ const PlayArena = () => {
     const [jugador, setJugador] = useState(jugadores[0])
     const [textoInicio, setTextoInicio] = useState(['Comenzar !!', 'Cancelar !!'])
     const [textoComenzar, setTextoComenzar] = useState(textoInicio[0])
+    const [panelDisabled, setPanelDisabled] = useState(true)
+    const [mensajeTurno, setMensajeTurno] = useState(['Su turno (X)','Turno otro Jugador (O)'])
+    const [turno, setTurno] = useState(0)
 
     const salasSelect =  salas.map((sala, index) => (
         <MenuItem key={index} value={sala}>{sala}</MenuItem>
@@ -53,18 +88,43 @@ const PlayArena = () => {
 
     const handleComenzar = () => {
         console.log("textoComenzar: ", textoComenzar)
-        if(textoComenzar === 'Comenzar !!')
+        if(textoComenzar === 'Comenzar !!') {
             setTextoComenzar('Cancelar !!')
-        else
+            setPanelDisabled(false)
+        }
+        else {
             setTextoComenzar('Comenzar !!')
-        debugger
+            setPanelDisabled(true)
+        }
+
+    }
+
+    const handleCellClick = (cell) => {
+        if (panelDisabled)
+            return
+        console.log("Celda presionada: ", cell)
+        if (board[cell].disabled)
+            console.log("celda desactivada")
+        else
+            console.log("CELDA ACTIVADA")
+        const newBoard = [...board]
+        newBoard[cell] = {
+            cellContent: "X",
+            disabled: true
+        }
+        setBoard(newBoard)
+        if (turno === 1)
+            setTurno(0)
+        else
+            setTurno(1)
     }
     return (
         <>
-        <Box sx={{display: 'grid', height: '100vh', gridTemplateColumns: 'minmax(250px, 2fr) 10fr', gap: 2,
+        <Box sx={{display: 'grid', height: '100vh', gridTemplateColumns: 'minmax(250px, 2fr) 10fr', gap: "30px",
             userSelect: "none"
          }}>
-            <Box sx={{ width: "100%", padding: 2, backgroundColor: "#f5f5f5" }}>
+            {/* Config column */}
+            <Box sx={{ width: "100%", padding: 2, backgroundColor: variables[0].backgroundcolor }}>
                 <Typography variant="h5" color="primary" gutterBottom>
                     Configuración
                 </Typography>
@@ -111,24 +171,38 @@ const PlayArena = () => {
                     {textoComenzar}
                 </Button>
             </Box>
-            <Box sx={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
+            {/* Board column */}
+            <Box sx={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                backgroundColor: "#339fff"
+            }}>
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "blue"}}
                 >
                     Juego {juego}
                 </Typography>
                 <Box sx={{display: "grid", gridTemplateColumns: "repeat(3, 150px)", gridTemplateRows: "repeat(3, 150px)",
-                    gap: 1, p: 1, m: 1, border: "1px solid", borderRadius: "5px"
+                    gap: 1, p: 1, m: 1, border: "1px solid", borderRadius: "5px",
+                    backgroundColor: "#66baff", opacity: panelDisabled ? 0.3 : null
+                    
                 }}>
                         {board && board.map((cell, index) => (
-                    <Box key={index} sx={{border: "1px solid", borderRadius: "5px", alignContent: "center",
-                        backgroundColor: "#e6f4ff"}}
-                    >
-                            <p>{cell}</p>
-                    </Box>
+                            <Box key={index} sx={{border: "1px solid", borderRadius: "5px", alignContent: "center",
+                                    backgroundColor: variables[1].cellBackgroundcolor,
+                                    opacity: cell.disabled ? variables[1].opacity : null,
+                                    fontSize: "60px", lineHeight: "30px", fontWeight: "bold"
+                                }}
+                                onClick={()=> handleCellClick(index)}
+                            >
+                                    <p>{cell.cellContent}</p>
+                            </Box>
                         ))}
                 </Box>
                 
+                <Typography variant="h5" component="div" 
+                    sx={{margin: "0 0 1 0",  color: "white"}}
+                >
+                    {panelDisabled ? null : mensajeTurno[turno]}
+                </Typography>
                 
             </Box>
         </Box>
