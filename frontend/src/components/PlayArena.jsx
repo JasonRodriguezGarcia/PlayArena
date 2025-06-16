@@ -149,7 +149,8 @@ const PlayArena = () => {
             setMensajeFinal(`Fin de Juego !!! Ganador: ${jugadorSign}`)
             setPanelDisabled(true)
             setEndGame(true)
-            setTextoComenzar('Comenzar !!')
+            // setTextoComenzar('Comenzar !!')
+            setTextoComenzar(textoInicio[0])
 
         }
         setTurno(turno == 1 ? 0 : 1)
