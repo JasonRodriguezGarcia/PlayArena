@@ -36,17 +36,16 @@ const PlayArena = () => {
 // Muy oscuro	#007acc	Azul profundo, aún legible
 
     
+    // const [board, setBoard] = useState(Array.from({ length: 3 }, () => (
+    //     Array.from({ length: 3 }, ()=> ({ cellContent: '', disabled: false }))
+    // )))
     const [board, setBoard] = useState([
-        {cellContent: '', disabled: false}, 
-        {cellContent: '', disabled: false}, 
-        {cellContent: '', disabled: false},
-        {cellContent: '', disabled: false},
-        {cellContent: '', disabled: false},
-        {cellContent: '', disabled: false},
-        {cellContent: '', disabled: false},
-        {cellContent: '', disabled: false},
-        {cellContent: '', disabled: false}
+        [{cellContent: '1', disabled: false}, {cellContent: '2', disabled: false}, {cellContent: '3', disabled: false}],
+        [{cellContent: '4', disabled: false}, {cellContent: '5', disabled: false}, {cellContent: '6', disabled: false}],
+        [{cellContent: '7', disabled: false}, {cellContent: '8', disabled: false}, {cellContent: '9', disabled: false}],
     ])
+
+    console.log("imprimo board: ", board)
     const [salas, setSalas] = useState(['Sala 1', 'Sala 2', 'Sala 3'])
     const [sala, setSala] = useState(salas[0])
     const [juegos, setJuegos] = useState(['3 en raya', 'Conecta 4', 'Hundir la flota'])
@@ -58,6 +57,7 @@ const PlayArena = () => {
     const [panelDisabled, setPanelDisabled] = useState(true)
     const [mensajeTurno, setMensajeTurno] = useState(['Su turno (X)','Turno otro Jugador (O)'])
     const [turno, setTurno] = useState(0)
+    const [endGame, setEndGame] = useState(false)
 
     const salasSelect =  salas.map((sala, index) => (
         <MenuItem key={index} value={sala}>{sala}</MenuItem>
@@ -96,7 +96,10 @@ const PlayArena = () => {
             setTextoComenzar('Comenzar !!')
             setPanelDisabled(true)
         }
+    }
 
+    const checkEndGame = () => {
+        return true
     }
 
     const handleCellClick = (cell) => {
@@ -109,10 +112,13 @@ const PlayArena = () => {
             console.log("CELDA ACTIVADA")
         const newBoard = [...board]
         newBoard[cell] = {
-            cellContent: "X",
+            cellContent: turno == 0 ? "X": "O",
             disabled: true
         }
         setBoard(newBoard)
+        if (checkEndGame()) {
+
+        }
         if (turno === 1)
             setTurno(0)
         else
@@ -185,7 +191,8 @@ const PlayArena = () => {
                     backgroundColor: "#66baff", opacity: panelDisabled ? 0.3 : null
                     
                 }}>
-                        {board && board.map((cell, index) => (
+                        {board && board.flat().map((cell, index) => (
+
                             <Box key={index} sx={{border: "1px solid", borderRadius: "5px", alignContent: "center",
                                     backgroundColor: variables[1].cellBackgroundcolor,
                                     opacity: cell.disabled ? variables[1].opacity : null,
@@ -193,8 +200,10 @@ const PlayArena = () => {
                                 }}
                                 onClick={()=> handleCellClick(index)}
                             >
-                                    <p>{cell.cellContent}</p>
+                                {cell.cellContent}
                             </Box>
+
+
                         ))}
                 </Box>
                 
