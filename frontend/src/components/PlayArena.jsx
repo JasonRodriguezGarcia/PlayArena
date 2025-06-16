@@ -36,16 +36,16 @@ const PlayArena = () => {
 // Muy oscuro	#007acc	Azul profundo, aún legible
 
     
-    // const [board, setBoard] = useState(Array.from({ length: 3 }, () => (
-    //     Array.from({ length: 3 }, ()=> ({ cellContent: '', disabled: false }))
-    // )))
+    // const [board, setBoard] = useState([
+    //     [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
+    //     [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
+    //     [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}]
+    // ])
     const [board, setBoard] = useState([
-        [{cellContent: '1', disabled: false}, {cellContent: '2', disabled: false}, {cellContent: '3', disabled: false}],
-        [{cellContent: '4', disabled: false}, {cellContent: '5', disabled: false}, {cellContent: '6', disabled: false}],
-        [{cellContent: '7', disabled: false}, {cellContent: '8', disabled: false}, {cellContent: '9', disabled: false}],
+        Array(3).fill({ cellContent: '', disabled: false }),
+        Array(3).fill({ cellContent: '', disabled: false }),
+        Array(3).fill({ cellContent: '', disabled: false })
     ])
-
-    console.log("imprimo board: ", board)
     const [salas, setSalas] = useState(['Sala 1', 'Sala 2', 'Sala 3'])
     const [sala, setSala] = useState(salas[0])
     const [juegos, setJuegos] = useState(['3 en raya', 'Conecta 4', 'Hundir la flota'])
@@ -58,6 +58,7 @@ const PlayArena = () => {
     const [mensajeTurno, setMensajeTurno] = useState(['Su turno (X)','Turno otro Jugador (O)'])
     const [turno, setTurno] = useState(0)
     const [endGame, setEndGame] = useState(false)
+    const [mensajeFinal, setMensajeFinal] = useState('')
 
     const salasSelect =  salas.map((sala, index) => (
         <MenuItem key={index} value={sala}>{sala}</MenuItem>
@@ -89,41 +90,71 @@ const PlayArena = () => {
     const handleComenzar = () => {
         console.log("textoComenzar: ", textoComenzar)
         if(textoComenzar === 'Comenzar !!') {
-            setTextoComenzar('Cancelar !!')
+            setBoard([
+                [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
+                [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
+                [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}]
+            ])
+        // setTextoComenzar('Cancelar !!')
+            setTextoComenzar(textoInicio[0])
             setPanelDisabled(false)
+            setEndGame(false)
+            setTurno(0)
         }
         else {
-            setTextoComenzar('Comenzar !!')
+            // setTextoComenzar('Comenzar !!')
+            setTextoComenzar(textoInicio[1])
             setPanelDisabled(true)
         }
+
     }
 
-    const checkEndGame = () => {
-        return true
+    const checkEndGame = (boardToCheck, turnoTocheck) => {
+        debugger
+        for (let index = 0; index < boardToCheck.length; index++) {
+            if (boardToCheck[index][0].cellContent == turnoTocheck && boardToCheck[index][1].cellContent == turnoTocheck && boardToCheck[index][2].cellContent == turnoTocheck)
+                return true
+            if (boardToCheck[0][index].cellContent == turnoTocheck && boardToCheck[1][index].cellContent == turnoTocheck && boardToCheck[2][index].cellContent == turnoTocheck)
+                return true
+            
+        }
+        return false
     }
 
     const handleCellClick = (cell) => {
         if (panelDisabled)
             return
         console.log("Celda presionada: ", cell)
-        if (board[cell].disabled)
+            // Convertimos índice plano a 2D [row, col]
+        const row = Math.floor(cell / 3);
+        const col = cell % 3;
+        if (board[row][col].disabled) {
             console.log("celda desactivada")
+            return
+        }
         else
             console.log("CELDA ACTIVADA")
+        const jugadorSign = turno == 0 ? "X": "O"
         const newBoard = [...board]
-        newBoard[cell] = {
-            cellContent: turno == 0 ? "X": "O",
+        newBoard[row][col] = {
+            cellContent: jugadorSign,
             disabled: true
         }
-        setBoard(newBoard)
-        if (checkEndGame()) {
+        // setBoard(prev => {
+        //     const tempBoard = [...newBoard]
+        //     return tempBoard
+        // })
+        if (checkEndGame(newBoard, jugadorSign)) {
+            setBoard(newBoard)
+            setMensajeFinal(`Fin de Juego !!! Ganador: ${jugadorSign}`)
+            setPanelDisabled(true)
+            setEndGame(true)
+            setTextoComenzar('Comenzar !!')
 
         }
-        if (turno === 1)
-            setTurno(0)
-        else
-            setTurno(1)
+        setTurno(turno == 1 ? 0 : 1)
     }
+
     return (
         <>
         <Box sx={{display: 'grid', height: '100vh', gridTemplateColumns: 'minmax(250px, 2fr) 10fr', gap: "30px",
@@ -192,7 +223,6 @@ const PlayArena = () => {
                     
                 }}>
                         {board && board.flat().map((cell, index) => (
-
                             <Box key={index} sx={{border: "1px solid", borderRadius: "5px", alignContent: "center",
                                     backgroundColor: variables[1].cellBackgroundcolor,
                                     opacity: cell.disabled ? variables[1].opacity : null,
@@ -200,10 +230,8 @@ const PlayArena = () => {
                                 }}
                                 onClick={()=> handleCellClick(index)}
                             >
-                                {cell.cellContent}
+                                    <p>{cell.cellContent}</p>
                             </Box>
-
-
                         ))}
                 </Box>
                 
@@ -211,6 +239,7 @@ const PlayArena = () => {
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
                     {panelDisabled ? null : mensajeTurno[turno]}
+                    {endGame ? mensajeFinal: null}
                 </Typography>
                 
             </Box>
