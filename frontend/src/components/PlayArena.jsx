@@ -41,11 +41,16 @@ const PlayArena = () => {
     //     [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
     //     [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}]
     // ])
-    const [board, setBoard] = useState([
-        Array(3).fill({ cellContent: '', disabled: false }),
-        Array(3).fill({ cellContent: '', disabled: false }),
-        Array(3).fill({ cellContent: '', disabled: false })
-    ])
+    // const [board, setBoard] = useState([
+    //     Array(3).fill({ cellContent: '', disabled: false }),
+    //     Array(3).fill({ cellContent: '', disabled: false }),
+    //     Array(3).fill({ cellContent: '', disabled: false })
+    // ])
+    const [board, setBoard] = useState(
+        Array.from({ length: 3 }, () => (
+            Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
+        ))
+    );
     const [salas, setSalas] = useState(['Sala 1', 'Sala 2', 'Sala 3'])
     const [sala, setSala] = useState(salas[0])
     const [juegos, setJuegos] = useState(['3 en raya', 'Conecta 4', 'Hundir la flota'])
@@ -70,11 +75,6 @@ const PlayArena = () => {
         <MenuItem key={index} value={jugadores}>{jugadores}</MenuItem>
     ))
     
-    // const lineasDatosVotantes = votantes.map((votante, index) => (
-    //     <MenuItem key={index} value={votante.idVotante}>({votante.idVotante}) {votante.nombre} - {votante.codigoPais}</MenuItem>
-    // ))
-
-    
     const handleChangeSalas = (e) => {
         setSala(e.target.value)
     }
@@ -96,14 +96,14 @@ const PlayArena = () => {
                 [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}]
             ])
         // setTextoComenzar('Cancelar !!')
-            setTextoComenzar(textoInicio[0])
+            setTextoComenzar(textoInicio[1])
             setPanelDisabled(false)
             setEndGame(false)
             setTurno(0)
         }
         else {
             // setTextoComenzar('Comenzar !!')
-            setTextoComenzar(textoInicio[1])
+            setTextoComenzar(textoInicio[0])
             setPanelDisabled(true)
         }
 
@@ -122,7 +122,8 @@ const PlayArena = () => {
     }
 
     const handleCellClick = (cell) => {
-        if (panelDisabled || turno == 1)
+        // if (panelDisabled || turno == 1)
+        if (panelDisabled)
             return
         console.log("Celda presionada: ", cell)
             // Convertimos índice plano a 2D [row, col]
@@ -140,12 +141,9 @@ const PlayArena = () => {
             cellContent: jugadorSign,
             disabled: true
         }
-        // setBoard(prev => {
-        //     const tempBoard = [...newBoard]
-        //     return tempBoard
-        // })
+
+        setBoard(newBoard)
         if (checkEndGame(newBoard, jugadorSign)) {
-            setBoard(newBoard)
             setMensajeFinal(`Fin de Juego !!! Ganador: ${jugadorSign}`)
             setPanelDisabled(true)
             setEndGame(true)
