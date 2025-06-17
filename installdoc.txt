@@ -14,6 +14,8 @@ npm install
 npm run dev
 
 npm install @mui/material @emotion/react @emotion/styled
+npm install socket.io-client
+
 
 Sincronizar nuestro proyecto en local con github
 ir a directorio principal \playarena
@@ -29,4 +31,13 @@ Estos comandos serán necesarios para empezar con el backend
 crear directorio backend
 crear fichero json para npm
 npm init -y
+npm install express cors
+npm install socket.io
+npm install  --save-dev nodemon
+
+cambiamos en package.json en scripts o añadimos linea nueva
+"dev": "nodemon index.js"
+
+npm run dev 
+
     

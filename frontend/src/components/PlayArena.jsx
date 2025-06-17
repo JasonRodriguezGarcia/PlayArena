@@ -1,17 +1,26 @@
 import { useState, useEffect } from "react";
 import {
-  Box,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Typography,
-  Grid,
-  Paper,
-  Input,
-
+    Box,
+    Button,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Typography,
+    Grid,
+    Paper,
+    Input,
+    
 } from '@mui/material';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000'); // Connect once
+
+// const rooms = ["Sala 1", "Sala 2", "Sala3"]
+// const nicks = ["Pepe", "Manuel", "Lola", "Maria"]
+const salas = ['Sala 1', 'Sala 2', 'Sala 3']
+const juegos = ['3 en raya', 'Conecta 4', 'Hundir la flota']
+const jugadores = ['Jugador vs computer', 'Jugador 1 vs Jugador 2']
 
 const PlayArena = () => {
     const [playerMark, setPlayerMark] = useState('X')
@@ -35,27 +44,13 @@ const PlayArena = () => {
 // Más oscuro	#339fff	Azul brillante pero más intenso
 // Muy oscuro	#007acc	Azul profundo, aún legible
 
-    
-    // const [board, setBoard] = useState([
-    //     [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
-    //     [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
-    //     [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}]
-    // ])
-    // const [board, setBoard] = useState([
-    //     Array(3).fill({ cellContent: '', disabled: false }),
-    //     Array(3).fill({ cellContent: '', disabled: false }),
-    //     Array(3).fill({ cellContent: '', disabled: false })
-    // ])
     const [board, setBoard] = useState(
         Array.from({ length: 3 }, () => (
             Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
         ))
     );
-    const [salas, setSalas] = useState(['Sala 1', 'Sala 2', 'Sala 3'])
     const [sala, setSala] = useState(salas[0])
-    const [juegos, setJuegos] = useState(['3 en raya', 'Conecta 4', 'Hundir la flota'])
     const [juego, setJuego] = useState(juegos[0])
-    const [jugadores, setJugadores] = useState(['Jugador vs computer', 'Jugador 1 vs Jugador 2'])
     const [jugador, setJugador] = useState(jugadores[0])
     const [textoInicio, setTextoInicio] = useState(['Comenzar !!', 'Cancelar !!'])
     const [textoComenzar, setTextoComenzar] = useState(textoInicio[0])
@@ -64,6 +59,53 @@ const PlayArena = () => {
     const [turno, setTurno] = useState(0)
     const [endGame, setEndGame] = useState(false)
     const [mensajeFinal, setMensajeFinal] = useState('')
+
+        const [connected, setConnected] = useState(true);
+        const [input, setInput]= useState('');
+        const [messages, setMessages] = useState([]);
+        const [selectRoom, setSelectRoom] = useState("Sala 1")
+        const [selectNick, setSelectNick] = useState("Pepe")
+    
+    useEffect(() => {
+    socket.on('connect', () => {
+        console.log('Connected to socket');
+        setConnected(true);
+        socket.emit('joinRoom', sala);
+    });
+
+    socket.on('chatRoomMessage', (msg) => {
+    // //   setMessages(prev => [...prev, msg.nick + " dice " + msg.message]);
+    //     setMessages(prev => {
+    //         const updated = [...prev, {message: msg.message, nick: msg.nick}];
+    //         console.log("Agregado mensaje:", updated);
+    //         return updated;
+    //     });
+    })
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from socket');
+        setConnected(false);
+    });
+
+    return () => {
+        socket.off('connect');
+        socket.off('disconnect');
+        socket.off('joinRoom');
+        // socket.off('chatRoomMessage');
+        
+    };
+    }, []);
+    
+    const sendChatRoom = (cell) => {
+        socket.emit('chatRoomMessage', {
+            room: selectRoom,
+            message: cell,
+            nick: selectNick,
+            timestamp: new Date()
+
+        }); // can pass in more data here
+    }
+
 
     const salasSelect =  salas.map((sala, index) => (
         <MenuItem key={index} value={sala}>{sala}</MenuItem>
@@ -90,11 +132,11 @@ const PlayArena = () => {
     const handleComenzar = () => {
         console.log("textoComenzar: ", textoComenzar)
         if(textoComenzar === 'Comenzar !!') {
-            setBoard([
-                [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
-                [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}],
-                [{cellContent: '', disabled: false}, {cellContent: '', disabled: false}, {cellContent: '', disabled: false}]
-            ])
+            setBoard(
+                Array.from({ length: 3 }, () => (
+                    Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
+                ))
+            )
         // setTextoComenzar('Cancelar !!')
             setTextoComenzar(textoInicio[1])
             setPanelDisabled(false)
@@ -141,8 +183,9 @@ const PlayArena = () => {
             cellContent: jugadorSign,
             disabled: true
         }
-
         setBoard(newBoard)
+        sendChatRoom(cell)
+
         if (checkEndGame(newBoard, jugadorSign)) {
             setMensajeFinal(`Fin de Juego !!! Ganador: ${jugadorSign}`)
             setPanelDisabled(true)
