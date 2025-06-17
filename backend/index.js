@@ -62,7 +62,7 @@ async function startServer() {
     //     //   res.status(500).json({ error: 'Failed finding productos' });
     //     // }
     
-    //     socket.to(room).emit('chatRoomMessage', {message, nick});
+        socket.to(room).emit('chatRoomMessage', {message, nick});
 
       }
     );

@@ -17,7 +17,7 @@ import { io } from 'socket.io-client';
 const socket = io('http://localhost:5000'); // Connect once
 
 // const rooms = ["Sala 1", "Sala 2", "Sala3"]
-// const nicks = ["Pepe", "Manuel", "Lola", "Maria"]
+const nicks = ["Pepe", "Manuel", "Lola", "Maria"]
 const salas = ['Sala 1', 'Sala 2', 'Sala 3']
 const juegos = ['3 en raya', 'Conecta 4', 'Hundir la flota']
 const jugadores = ['Jugador vs computer', 'Jugador 1 vs Jugador 2']
@@ -61,46 +61,58 @@ const PlayArena = () => {
     const [mensajeFinal, setMensajeFinal] = useState('')
 
         const [connected, setConnected] = useState(true);
-        const [input, setInput]= useState('');
-        const [messages, setMessages] = useState([]);
-        const [selectRoom, setSelectRoom] = useState("Sala 1")
-        const [selectNick, setSelectNick] = useState("Pepe")
+        // const [input, setInput]= useState('');
+        // const [messages, setMessages] = useState([]);
+        // const [selectRoom, setSelectRoom] = useState("Sala 1")
+        // const [selectNick, setSelectNick] = useState("Pepe")
+        const [nick, setNick] = useState(nicks[0])
     
     useEffect(() => {
-    socket.on('connect', () => {
-        console.log('Connected to socket');
-        setConnected(true);
-        socket.emit('joinRoom', sala);
-    });
+        socket.on('connect', () => {
+            console.log('Connected to socket');
+            setConnected(true);
+            socket.emit('joinRoom', sala);
+        });
 
-    socket.on('chatRoomMessage', (msg) => {
-    // //   setMessages(prev => [...prev, msg.nick + " dice " + msg.message]);
-    //     setMessages(prev => {
-    //         const updated = [...prev, {message: msg.message, nick: msg.nick}];
-    //         console.log("Agregado mensaje:", updated);
-    //         return updated;
-    //     });
-    })
+        socket.on('chatRoomMessage', (msg) => {
+        // //   setMessages(prev => [...prev, msg.nick + " dice " + msg.message]);
+        //     setMessages(prev => {
+        //         const updated = [...prev, {message: msg.message, nick: msg.nick}];
+        //         console.log("Agregado mensaje:", updated);
+        //         return updated;
+        //     });
+            console.log(msg)
+            const celda = msg.message
+            console.log("celda msg: ", celda)
+            console.log("panelDisabled: ", panelDisabled)
+            handleCellClick(celda)
 
-    socket.on('disconnect', () => {
-        console.log('Disconnected from socket');
-        setConnected(false);
-    });
+        })
 
-    return () => {
-        socket.off('connect');
-        socket.off('disconnect');
-        socket.off('joinRoom');
-        // socket.off('chatRoomMessage');
-        
-    };
+        socket.on('disconnect', () => {
+            console.log('Disconnected from socket');
+            setConnected(false);
+        });
+
+        return () => {
+            socket.off('connect');
+            socket.off('disconnect');
+            socket.off('joinRoom');
+            socket.off('chatRoomMessage');
+            
+        };
     }, []);
+    
+    const nicksSelect = nicks.map((nick, index) => (
+            <MenuItem key={index} value={nick}>{nick}</MenuItem>
+    ))
     
     const sendChatRoom = (cell) => {
         socket.emit('chatRoomMessage', {
-            room: selectRoom,
+            // room: selectRoom,
+            room: sala,
             message: cell,
-            nick: selectNick,
+            nick: nick,
             timestamp: new Date()
 
         }); // can pass in more data here
@@ -152,7 +164,6 @@ const PlayArena = () => {
     }
 
     const checkEndGame = (boardToCheck, turnoTocheck) => {
-        debugger
         for (let index = 0; index < boardToCheck.length; index++) {
             if (boardToCheck[index][0].cellContent == turnoTocheck && boardToCheck[index][1].cellContent == turnoTocheck && boardToCheck[index][2].cellContent == turnoTocheck)
                 return true
@@ -164,6 +175,7 @@ const PlayArena = () => {
     }
 
     const handleCellClick = (cell) => {
+        debugger
         // if (panelDisabled || turno == 1)
         if (panelDisabled)
             return
@@ -244,6 +256,19 @@ const PlayArena = () => {
                         onChange={(e)=> handleChangeJugadores(e)}
                         >
                         {jugadoresSelect}
+                    </Select>                            
+                </FormControl>
+                <FormControl fullWidth sx={{ mb: 2, backgroundColor: "#ffffff"}}>
+                    <InputLabel id="labelNicks">Nick</InputLabel>
+                    <Select
+                        labelId="labelNicks"
+                        id="selectNicks"
+                        value={nick}
+                        label="nicks"
+                        disabled={textoComenzar === textoInicio[1]? true: false}
+                        onChange={(e)=> setNick(e.target.value)}
+                        >
+                        {nicksSelect}
                     </Select>                            
                 </FormControl>
                 <Button variant="contained" onClick={handleComenzar}>
