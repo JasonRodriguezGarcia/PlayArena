@@ -122,7 +122,7 @@ const PlayArena = () => {
     }
 
     const handleCellClick = (cell) => {
-        if (panelDisabled)
+        if (panelDisabled || turno == 1)
             return
         console.log("Celda presionada: ", cell)
             // Convertimos índice plano a 2D [row, col]
