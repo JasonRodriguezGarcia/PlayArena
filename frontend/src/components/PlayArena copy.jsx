@@ -74,25 +74,19 @@ const PlayArena = () => {
             socket.emit('joinRoom', sala);
         });
 
-        socket.on('playerMovement', (msg) => {
-            console.log("imprimo msg: ", msg)
+        socket.on('chatRoomMessage', (msg) => {
+        // //   setMessages(prev => [...prev, msg.nick + " dice " + msg.message]);
+        //     setMessages(prev => {
+        //         const updated = [...prev, {message: msg.message, nick: msg.nick}];
+        //         console.log("Agregado mensaje:", updated);
+        //         return updated;
+        //     });
+            console.log(msg)
+            const celda = msg.message
+            console.log("celda msg: ", celda)
             console.log("panelDisabled: ", panelDisabled)
-            // debugger
-            const row = msg.repliedMessage.row
-            const col = msg.repliedMessage.col
-            // if (board[row][col].disabled) {
-            //     console.log("celda desactivada")
-            //     return
-            // }
-            // console.log("CELDA ACTIVADA")
-            const jugadorSign = turno == 0 ? "X": "O"
-            const newBoard = [...board]
-            newBoard[row][col] = {
-                // cellContent: jugadorSign,
-                cellContent: "x",
-                disabled: true
-            }
-            setBoard(newBoard)
+            handleCellClick(celda)
+
         })
 
         socket.on('disconnect', () => {
@@ -104,7 +98,8 @@ const PlayArena = () => {
             socket.off('connect');
             socket.off('disconnect');
             socket.off('joinRoom');
-            socket.off('playerMovement');
+            socket.off('chatRoomMessage');
+            
         };
     }, []);
     
@@ -113,7 +108,7 @@ const PlayArena = () => {
     ))
     
     const sendChatRoom = (cell) => {
-        socket.emit('playerMovement', {
+        socket.emit('chatRoomMessage', {
             // room: selectRoom,
             room: sala,
             message: cell,
@@ -123,12 +118,6 @@ const PlayArena = () => {
         }); // can pass in more data here
     }
 
-    const traductorCelda = (celda) => {
-        // Convertimos índice plano a 2D [row, col]
-        const row = Math.floor(celda / 3);
-        const col = celda % 3;
-        return { row, col }
-    }
 
     const salasSelect =  salas.map((sala, index) => (
         <MenuItem key={index} value={sala}>{sala}</MenuItem>
@@ -153,14 +142,21 @@ const PlayArena = () => {
     }
 
     const handleComenzar = () => {
-        // console.log("textoComenzar: ", textoComenzar)
-        if(textoComenzar === textoInicio[0]) {
+        console.log("textoComenzar: ", textoComenzar)
+        if(textoComenzar === 'Comenzar !!') {
+            setBoard(
+                Array.from({ length: 3 }, () => (
+                    Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
+                ))
+            )
+        // setTextoComenzar('Cancelar !!')
             setTextoComenzar(textoInicio[1])
             setPanelDisabled(false)
             setEndGame(false)
             setTurno(0)
         }
         else {
+            // setTextoComenzar('Comenzar !!')
             setTextoComenzar(textoInicio[0])
             setPanelDisabled(true)
         }
@@ -169,33 +165,48 @@ const PlayArena = () => {
 
     const checkEndGame = (boardToCheck, turnoTocheck) => {
         for (let index = 0; index < boardToCheck.length; index++) {
-            // horizontal check
             if (boardToCheck[index][0].cellContent == turnoTocheck && boardToCheck[index][1].cellContent == turnoTocheck && boardToCheck[index][2].cellContent == turnoTocheck)
                 return true
-            // vertical check
             if (boardToCheck[0][index].cellContent == turnoTocheck && boardToCheck[1][index].cellContent == turnoTocheck && boardToCheck[2][index].cellContent == turnoTocheck)
                 return true
+            
         }
-        // diagonal1 check
-            if (boardToCheck[0][0].cellContent == turnoTocheck && boardToCheck[1][1].cellContent == turnoTocheck && boardToCheck[2][2].cellContent == turnoTocheck)
-                return true
-        // diagonal2 check
-            if (boardToCheck[2][0].cellContent == turnoTocheck && boardToCheck[1][1].cellContent == turnoTocheck && boardToCheck[0][2].cellContent == turnoTocheck)
-                return true
         return false
     }
 
     const handleCellClick = (cell) => {
-        // const { row, col } = traductorCelda(cell)
-        // const newBoard = [...board]
-        // newBoard[row][col] = {
-        //     // cellContent: jugadorSign,
-        //     cellContent: "x",
-        //     disabled: true
-        // }
-        // setBoard(newBoard)
-
+        debugger
+        // if (panelDisabled || turno == 1)
+        if (panelDisabled)
+            return
+        console.log("Celda presionada: ", cell)
+            // Convertimos índice plano a 2D [row, col]
+        const row = Math.floor(cell / 3);
+        const col = cell % 3;
+        if (board[row][col].disabled) {
+            console.log("celda desactivada")
+            return
+        }
+        else
+            console.log("CELDA ACTIVADA")
+        const jugadorSign = turno == 0 ? "X": "O"
+        const newBoard = [...board]
+        newBoard[row][col] = {
+            cellContent: jugadorSign,
+            disabled: true
+        }
+        setBoard(newBoard)
         sendChatRoom(cell)
+
+        if (checkEndGame(newBoard, jugadorSign)) {
+            setMensajeFinal(`Fin de Juego !!! Ganador: ${jugadorSign}`)
+            setPanelDisabled(true)
+            setEndGame(true)
+            // setTextoComenzar('Comenzar !!')
+            setTextoComenzar(textoInicio[0])
+
+        }
+        setTurno(turno == 1 ? 0 : 1)
     }
 
     return (

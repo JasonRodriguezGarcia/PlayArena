@@ -43,26 +43,57 @@ async function startServer() {
       socket.on ("joinRoom", (room) => {
         console.log(`Socket ${socket.id} has joined ${room}`);
         socket.join(room);
+        // enviar a ese socket datos inciales??
       });
 
-      socket.on('chatRoomMessage', async ({room, message, nick, timestamp})=> {
-        console.log("receiving");
-    //     // try {
+      socket.on('playerMovement', async ({room, message, nick, timestamp})=> {
+        console.log("receiving: ", room, " - ", message, nick);
 
-    //     //   const newDoc = {
-    //     //     room: room,
-    //     //     message: message,
-    //     //     nick: nick,
-    //     //     timestamp: timestamp
-    //     //   }
-    //     //   const resultado = await db.collection("chats").insertOne(newDoc);
-       
-    //     // } catch (error) {
-    //     //   console.error("Error finding productos:", error);
-    //     //   res.status(500).json({ error: 'Failed finding productos' });
-    //     // }
+        //         // if (panelDisabled || turno == 1)
+        // if (panelDisabled)
+        //     return
+        // console.log("Celda presionada: ", cell)
+        //     // Convertimos índice plano a 2D [row, col]
+        // const row = Math.floor(cell / 3);
+        // const col = cell % 3;
+        // if (board[row][col].disabled) {
+        //     console.log("celda desactivada")
+        //     return
+        // }
+        // else
+        //     console.log("CELDA ACTIVADA")
+        // const jugadorSign = turno == 0 ? "X": "O"
+        // const newBoard = [...board]
+        // newBoard[row][col] = {
+        //     cellContent: jugadorSign,
+        //     disabled: true
+        // }
+        // setBoard(newBoard)
+        // sendChatRoom(cell)
+
+        // if (checkEndGame(newBoard, jugadorSign)) {
+        //     setMensajeFinal(`Fin de Juego !!! Ganador: ${jugadorSign}`)
+        //     setPanelDisabled(true)
+        //     setEndGame(true)
+        //     // setTextoComenzar('Comenzar !!')
+        //     setTextoComenzar(textoInicio[0])
+
+        // }
+        // setTurno(turno == 1 ? 0 : 1)
+
+
+        // Convertimos índice plano a 2D [row, col]
+        const row = Math.floor(message / 3);
+        const col = message % 3;
+
+        const repliedMessage = { row: row, col: col}
+        console.log("sending: ", repliedMessage)
     
-        socket.to(room).emit('chatRoomMessage', {message, nick});
+        // envia a todos los de la sala a excepcion del emisor
+        // socket.to(room).emit('playerMovement', {message, nick});
+        // socket.to(room).emit('playerMovement', {repliedMessage, nick});
+        // envia a todos los de la sala incluido el emisor
+        io.to(room).emit('playerMovement', {repliedMessage, nick});
 
       }
     );
