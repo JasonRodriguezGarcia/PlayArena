@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     Box,
     Button,
@@ -44,21 +44,25 @@ const PlayArena = () => {
 // Más oscuro	#339fff	Azul brillante pero más intenso
 // Muy oscuro	#007acc	Azul profundo, aún legible
 
-    const [board, setBoard] = useState(
-        Array.from({ length: 3 }, () => (
-            Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
-        ))
-    );
+    // const [board, setBoard] = useState(
+    //     Array.from({ length: 3 }, () => (
+    //         Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
+    //     ))
+    // );
+    // const [board, setBoard] = useState([])
+    const board = useRef([])
     const [sala, setSala] = useState(salas[0])
     const [juego, setJuego] = useState(juegos[0])
     const [jugador, setJugador] = useState(jugadores[0])
     const [textoInicio, setTextoInicio] = useState(['Comenzar !!', 'Cancelar !!'])
     const [textoComenzar, setTextoComenzar] = useState(textoInicio[0])
-    const [panelDisabled, setPanelDisabled] = useState(true)
+    // const [panelDisabled, setPanelDisabled] = useState(true)
+    const panelDisabled = useRef(true)
     const [mensajeTurno, setMensajeTurno] = useState(['Su turno (X)','Turno otro Jugador (O)'])
     const [turno, setTurno] = useState(0)
     const [endGame, setEndGame] = useState(false)
     const [mensajeFinal, setMensajeFinal] = useState('')
+    const [jugadorSign, setJugadorSign] = useState('')
 
         const [connected, setConnected] = useState(true);
         // const [input, setInput]= useState('');
@@ -74,25 +78,38 @@ const PlayArena = () => {
             socket.emit('joinRoom', sala);
         });
 
-        socket.on('playerMovement', (msg) => {
+        socket.on('initialData', (data) => {
+            console.log("Recibido initialData:", data);
+            // Aquí puedes usar `data` para inicializar el estado del tablero, jugadores, etc.
+                    // OJO ESTO AL SER UN ARRAY DE ARRAYS HAY QUE HACER ASÍ
+            const datosBoard = [...data.board]
+            console.log("imprimo datosBoard: ", datosBoard)
+            if (data.board) 
+                // setBoard(datosBoard)
+                board.current = [...datosBoard]
+            if (data.playerSign) setJugadorSign(data.playerSign)
+            // if (data.turno !== undefined) setTurno(data.turno);
+            // Agrega más según lo que incluya `data`
+            console.log("imprimo board: ", board.current)
+        });
+
+        socket.on('playerMovement', async (msg) => {
             console.log("imprimo msg: ", msg)
-            console.log("panelDisabled: ", panelDisabled)
-            // debugger
-            const row = msg.repliedMessage.row
-            const col = msg.repliedMessage.col
-            // if (board[row][col].disabled) {
-            //     console.log("celda desactivada")
-            //     return
-            // }
-            // console.log("CELDA ACTIVADA")
-            const jugadorSign = turno == 0 ? "X": "O"
-            const newBoard = [...board]
+            console.log("panelDisabled: ", panelDisabled.current)
+            const mensaje = await {...msg}
+            const row = mensaje.repliedMessage.row
+            const col = mensaje.repliedMessage.col
+            console.log("row col: ", row, col)
+            console.log("board: ", board)
+            const newBoard = [...board.current]
             newBoard[row][col] = {
                 // cellContent: jugadorSign,
+                // cellContent: "x",
                 cellContent: "x",
                 disabled: true
             }
-            setBoard(newBoard)
+            // setBoard(newBoard)
+            board.current = newBoard
         })
 
         socket.on('disconnect', () => {
@@ -156,13 +173,13 @@ const PlayArena = () => {
         // console.log("textoComenzar: ", textoComenzar)
         if(textoComenzar === textoInicio[0]) {
             setTextoComenzar(textoInicio[1])
-            setPanelDisabled(false)
+            panelDisabled.current = false
             setEndGame(false)
             setTurno(0)
         }
         else {
             setTextoComenzar(textoInicio[0])
-            setPanelDisabled(true)
+            panelDisabled.current = true
         }
 
     }
@@ -194,7 +211,7 @@ const PlayArena = () => {
         //     disabled: true
         // }
         // setBoard(newBoard)
-
+        console.log("imprimo cell: ", cell)
         sendChatRoom(cell)
     }
 
@@ -275,10 +292,10 @@ const PlayArena = () => {
                 </Typography>
                 <Box sx={{display: "grid", gridTemplateColumns: "repeat(3, 150px)", gridTemplateRows: "repeat(3, 150px)",
                     gap: 1, p: 1, m: 1, border: "1px solid", borderRadius: "5px",
-                    backgroundColor: "#66baff", opacity: panelDisabled ? 0.3 : null
+                    backgroundColor: "#66baff", opacity: panelDisabled.current ? 0.3 : null
                     
                 }}>
-                        {board && board.flat().map((cell, index) => (
+                        {board.current && board.current.flat().map((cell, index) => (
                             <Box key={index} sx={{border: "1px solid", borderRadius: "5px", alignContent: "center",
                                     backgroundColor: variables[1].cellBackgroundcolor,
                                     opacity: cell.disabled ? variables[1].opacity : null,
@@ -294,7 +311,7 @@ const PlayArena = () => {
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
-                    {panelDisabled ? null : mensajeTurno[turno]}
+                    {panelDisabled.current ? null : mensajeTurno[turno]}
                     {endGame ? mensajeFinal: null}
                 </Typography>
                 
