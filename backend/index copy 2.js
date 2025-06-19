@@ -5,12 +5,15 @@ import { fileURLToPath } from "url";
 import { Server as SocketIOServer } from "socket.io";
 // import connectDB from './db-mongodb.js';  // Import your MongoDB connection module
 import playarenaRouter from './routes/playarena.js';
+// import getInitialData from './utils/backendFunctions.js'
 
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+let turno = undefined
+let playerSign
 
 // Middleware
 app.use(cors());
@@ -43,7 +46,28 @@ async function startServer() {
       socket.on ("joinRoom", (room) => {
         console.log(`Socket ${socket.id} has joined ${room}`);
         socket.join(room);
-        // enviar a ese socket datos inciales??
+        const board = Array.from({ length: 3 }, () => (
+                Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
+                )
+              )
+        console.log("turno: ", turno, "typeof: ", typeof(turno))
+        if (typeof(turno) === "undefined")
+        {
+
+          turno = true
+          playerSign = "X"
+        }
+        else {
+          turno = false
+          playerSign = "O"
+        }
+        const initialData = {
+          board: board,
+          turno: turno,
+          playerSign: playerSign
+        }
+        // enviar a ese socket datos iniciales??
+        socket.emit("initialData", initialData)
       });
 
       socket.on('playerMovement', async ({room, message, nick, timestamp})=> {
