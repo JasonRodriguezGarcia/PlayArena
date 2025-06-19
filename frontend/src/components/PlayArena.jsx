@@ -82,6 +82,7 @@ const PlayArena = () => {
             const playerMark = msg.repliedMessage.mark
             // const newBoard = [...board] // Y LUEGO MANIPULAR Y setBoard NO ES VALIDO !!!
             setBoard(prevBoard => {
+                setTurno(playerMark == "X" ? 0 : 1)
                 const newBoard = prevBoard.map(row => row.map(cell => ({ ...cell })));
                 newBoard[row][col] = {
                     cellContent: playerMark,
