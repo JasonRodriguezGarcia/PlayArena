@@ -31,6 +31,9 @@ async function startServer() {
       console.log(`Server running on http://localhost:${PORT}`);
     });
 
+    // Estado por sala
+    const games = {}
+
     // Setup Socket.IO server on the same HTTP server
     const io = new SocketIOServer(httpServer, {
       cors: {
@@ -43,50 +46,31 @@ async function startServer() {
       socket.on ("joinRoom", (room) => {
         console.log(`Socket ${socket.id} has joined ${room}`);
         socket.join(room);
-        // enviar a ese socket datos inciales??
+        if (!games[room]) {
+            games[room] = {
+                board: Array.from({ length: 3 }, () => Array(3).fill('')),
+                turno: 0,
+            }
+        }
       });
 
       socket.on('playerMovement', async ({room, message, nick, timestamp})=> {
         console.log("receiving: ", room, " - ", message, nick);
+        const game = games[room]
+        if (!game)
+            return
+        const row = Math.floor(message / 3)
+        const col = message % 3
 
-        //         // if (panelDisabled || turno == 1)
-        // if (panelDisabled)
-        //     return
-        // console.log("Celda presionada: ", cell)
-        //     // Convertimos índice plano a 2D [row, col]
-        // const row = Math.floor(cell / 3);
-        // const col = cell % 3;
-        // if (board[row][col].disabled) {
-        //     console.log("celda desactivada")
-        //     return
-        // }
-        // else
-        //     console.log("CELDA ACTIVADA")
-        // const jugadorSign = turno == 0 ? "X": "O"
-        // const newBoard = [...board]
-        // newBoard[row][col] = {
-        //     cellContent: jugadorSign,
-        //     disabled: true
-        // }
-        // setBoard(newBoard)
-        // sendChatRoom(cell)
+        const {turno, board} = game
+        if (board[row][col] !== '') {
+            return; // celda ocupada
+        }
+        const mark = turno === 0 ? "X": "O"
+        board[row][col] = mark
+        game.turno = 1 - turno
 
-        // if (checkEndGame(newBoard, jugadorSign)) {
-        //     setMensajeFinal(`Fin de Juego !!! Ganador: ${jugadorSign}`)
-        //     setPanelDisabled(true)
-        //     setEndGame(true)
-        //     // setTextoComenzar('Comenzar !!')
-        //     setTextoComenzar(textoInicio[0])
-
-        // }
-        // setTurno(turno == 1 ? 0 : 1)
-
-
-        // Convertimos índice plano a 2D [row, col]
-        const row = Math.floor(message / 3);
-        const col = message % 3;
-
-        const repliedMessage = { row: row, col: col}
+        const repliedMessage = { cell: message, mark}
         console.log("sending: ", repliedMessage)
     
         // envia a todos los de la sala a excepcion del emisor

@@ -58,7 +58,7 @@ const PlayArena = () => {
     const [mensajeTurno, setMensajeTurno] = useState(['Su turno (X)','Turno otro Jugador (O)'])
     const [turno, setTurno] = useState(0)
     const [endGame, setEndGame] = useState(false)
-    const [mensajeFinal, setMensajeFinal] = useState('')
+    const [endGameMessage, setEndGameMessage] = useState('')
 
         const [connected, setConnected] = useState(true);
         // const [input, setInput]= useState('');
@@ -77,22 +77,24 @@ const PlayArena = () => {
         socket.on('playerMovement', (msg) => {
             console.log("imprimo msg: ", msg)
             console.log("panelDisabled: ", panelDisabled)
-            // debugger
-            const row = msg.repliedMessage.row
-            const col = msg.repliedMessage.col
-            // if (board[row][col].disabled) {
-            //     console.log("celda desactivada")
-            //     return
-            // }
-            // console.log("CELDA ACTIVADA")
-            const jugadorSign = turno == 0 ? "X": "O"
-            const newBoard = [...board]
-            newBoard[row][col] = {
-                // cellContent: jugadorSign,
-                cellContent: "x",
-                disabled: true
-            }
-            setBoard(newBoard)
+
+            const { row, col } = traductorCelda(msg.repliedMessage.cell)
+            const playerMark = msg.repliedMessage.mark
+            // const newBoard = [...board] // Y LUEGO MANIPULAR Y setBoard NO ES VALIDO !!!
+            setBoard(prevBoard => {
+                const newBoard = prevBoard.map(row => row.map(cell => ({ ...cell })));
+                newBoard[row][col] = {
+                    cellContent: playerMark,
+                    disabled: true
+                }
+                const result = checkEndGame(newBoard, playerMark)
+                if (result) {
+                    setEndGame(true)
+                    setEndGameMessage(`Ganador Jugador ${playerMark}`)
+                    setPanelDisabled(true)
+                }
+                return newBoard
+            })
         })
 
         socket.on('disconnect', () => {
@@ -125,8 +127,8 @@ const PlayArena = () => {
 
     const traductorCelda = (celda) => {
         // Convertimos índice plano a 2D [row, col]
-        const row = Math.floor(celda / 3);
-        const col = celda % 3;
+        const row = Math.floor(celda / 3)
+        const col = celda % 3
         return { row, col }
     }
 
@@ -164,7 +166,6 @@ const PlayArena = () => {
             setTextoComenzar(textoInicio[0])
             setPanelDisabled(true)
         }
-
     }
 
     const checkEndGame = (boardToCheck, turnoTocheck) => {
@@ -186,23 +187,30 @@ const PlayArena = () => {
     }
 
     const handleCellClick = (cell) => {
+        if (panelDisabled)
+            return
         // const { row, col } = traductorCelda(cell)
-        // const newBoard = [...board]
+        // const newBoard = board.map(row => row.map(cell => ({ ...cell })));
         // newBoard[row][col] = {
         //     // cellContent: jugadorSign,
-        //     cellContent: "x",
+        //     cellContent: "X",
         //     disabled: true
         // }
         // setBoard(newBoard)
-
+        // const result = checkEndGame(board, 'X')
+        // setEndGame(result)
+        // if (endGame) {
+        //     setEndGameMessage(`Ganador Jugador ${'x'}`)
+        //     setPanelDisabled(true)
+        // }
         sendChatRoom(cell)
     }
-
+    
     return (
         <>
         <Box sx={{display: 'grid', height: '100vh', gridTemplateColumns: 'minmax(250px, 2fr) 10fr', gap: "30px",
             userSelect: "none"
-         }}>
+        }}>
             {/* Config column */}
             <Box sx={{ width: "100%", padding: 2, backgroundColor: variables[0].backgroundcolor }}>
                 <Typography variant="h5" color="primary" gutterBottom>
@@ -295,7 +303,7 @@ const PlayArena = () => {
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
                     {panelDisabled ? null : mensajeTurno[turno]}
-                    {endGame ? mensajeFinal: null}
+                    {endGame ? endGameMessage: null}
                 </Typography>
                 
             </Box>
