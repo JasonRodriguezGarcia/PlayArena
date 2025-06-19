@@ -50,12 +50,14 @@ async function startServer() {
             games[room] = {
                 board: Array.from({ length: 3 }, () => Array(3).fill('')),
                 turno: 0,
+                players: 0
             }
         }
+        console.log("Creada sala: ", room)
       });
 
       socket.on('playerMovement', async ({room, message, nick, timestamp})=> {
-        console.log("receiving: ", room, " - ", message, nick);
+        console.log("receiving: ", room, " - Celda ", message, nick);
         const game = games[room]
         if (!game)
             return
