@@ -59,6 +59,7 @@ const PlayArena = () => {
     const [turno, setTurno] = useState(0)
     const [endGame, setEndGame] = useState(false)
     const [endGameMessage, setEndGameMessage] = useState('')
+    const [waitPlayerMessage, setWaitPlayerMessage] = useState(['', 'Esperando otro jugador ...'])
 
         const [connected, setConnected] = useState(true);
         // const [input, setInput]= useState('');
@@ -73,6 +74,19 @@ const PlayArena = () => {
             setConnected(true);
             socket.emit('joinRoom', sala);
         });
+
+        socket.on('startGame', (msg) => {
+            console.log("imprimo msg: ", msg)
+            if (msg.startGame == true) {
+                setTextoComenzar(textoInicio[1])
+                setPanelDisabled(false)
+                setEndGame(false)
+                setTurno(0)
+                setWaitPlayerMessage([0])
+            }
+            else
+                setWaitPlayerMessage([1])
+        })
 
         socket.on('playerMovement', (msg) => {
             console.log("imprimo msg: ", msg)
@@ -107,6 +121,7 @@ const PlayArena = () => {
             socket.off('connect');
             socket.off('disconnect');
             socket.off('joinRoom');
+            socket.off('startGame');
             socket.off('playerMovement');
         };
     }, []);
@@ -156,15 +171,19 @@ const PlayArena = () => {
     }
 
     const handleComenzar = () => {
-        // console.log("textoComenzar: ", textoComenzar)
-        if(textoComenzar === textoInicio[0]) {
-            setTextoComenzar(textoInicio[1])
-            setPanelDisabled(false)
-            setEndGame(false)
-            setTurno(0)
+        if(textoComenzar === textoInicio[0]) { // comenzar
+            socket.emit('startGame', {
+                room: sala,
+                nick: nick
+            })
+
+            // setTextoComenzar(textoInicio[1])
+            // setPanelDisabled(false)
+            // setEndGame(false)
+            // setTurno(0)
         }
         else {
-            setTextoComenzar(textoInicio[0])
+            setTextoComenzar(textoInicio[0]) // cancelar
             setPanelDisabled(true)
         }
     }
@@ -190,23 +209,14 @@ const PlayArena = () => {
     const handleCellClick = (cell) => {
         if (panelDisabled)
             return
-        // const { row, col } = traductorCelda(cell)
-        // const newBoard = board.map(row => row.map(cell => ({ ...cell })));
-        // newBoard[row][col] = {
-        //     // cellContent: jugadorSign,
-        //     cellContent: "X",
-        //     disabled: true
-        // }
-        // setBoard(newBoard)
-        // const result = checkEndGame(board, 'X')
-        // setEndGame(result)
-        // if (endGame) {
-        //     setEndGameMessage(`Ganador Jugador ${'x'}`)
-        //     setPanelDisabled(true)
-        // }
         sendChatRoom(cell)
     }
     
+    const handleReiniciarSala = () => {
+        socket.emit('clearRoom', {
+            room: sala
+        })
+    }
     return (
         <>
         <Box sx={{display: 'grid', height: '100vh', gridTemplateColumns: 'minmax(250px, 2fr) 10fr', gap: "30px",
@@ -272,6 +282,15 @@ const PlayArena = () => {
                 <Button variant="contained" onClick={handleComenzar}>
                     {textoComenzar}
                 </Button>
+                <Button variant="contained" onClick={handleReiniciarSala}>
+                    Reiniciar sala
+                </Button>
+                <Typography variant="h5" component="div" 
+                    sx={{margin: "0 0 1 0",  color: "blue"}}>
+                {/* // <Typography variant="h6" color="primary" gutterBottom> */}
+                    {waitPlayerMessage[0]}
+                </Typography>
+
             </Box>
             {/* Board column */}
             <Box sx={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",

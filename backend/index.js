@@ -50,11 +50,41 @@ async function startServer() {
             games[room] = {
                 board: Array.from({ length: 3 }, () => Array(3).fill('')),
                 turno: 0,
-                players: 0
+                players: 0 // igual hay que cambiar en el futuro a array con nick de players
             }
         }
         console.log("Creada sala: ", room)
       });
+      socket.on('clearRoom', async ({room})=> {
+        if (games[room]) {
+            games[room] = {
+                board: Array.from({ length: 3 }, () => Array(3).fill('')),
+                turno: 0,
+                players: 0 // igual hay que cambiar en el futuro a array con nick de players
+            }
+        }
+      })
+
+
+      socket.on('startGame', async ({room, nick})=> {
+        let startGame = false // creado startgame para cuando se juege contra el ordenador
+        let turn
+        if (games[room].players == 0) {
+            games[room].players +=1
+            turn = 1
+        } else if (games[room].players == 1)
+            games[room].players +=1
+            turn = 1
+        if (games[room].players == 2) {
+            startGame = true
+            // enviar a todos los de sala el comienzo del juego
+            io.to(room).emit('startGame', {startGame: startGame, turn: turn})
+            socket.emit('startGame', {startGame: startGame});
+            return
+        }
+        // io.to(room).emit('waitPlayer', {startGame: startGame});
+        // Enviar mensaje de vuelta SOLO al remitente
+      })
 
       socket.on('playerMovement', async ({room, message, nick, timestamp})=> {
         console.log("receiving: ", room, " - Celda ", message, nick);
