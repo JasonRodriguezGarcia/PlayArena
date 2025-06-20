@@ -77,23 +77,36 @@ const PlayArena = () => {
 
         socket.on('startGame', (msg) => {
             console.log("imprimo msg: ", msg)
+            debugger
+            setTurno(msg.turn)
+            console.log("imprimo msg.turn: ", msg.turn)
+            const nuevoTurno = msg.turn === 0 ? 1 : 0
+            setTurno(nuevoTurno)
+            // setWaitPlayerMessage(waitPlayerMessage[nuevoTurno])
+            console.log("setTurno: ", turno)
             if (msg.startGame == true) {
                 setTextoComenzar(textoInicio[1])
-                setPanelDisabled(false)
                 setEndGame(false)
-                setTurno(0)
-                setWaitPlayerMessage([0])
+                setTurno(msg.turn)
+                // setWaitPlayerMessage([0])
+                if (turno == nuevoTurno)
+                    setPanelDisabled(false)
+                else
+                    setPanelDisabled(true)
             }
-            else
-                setWaitPlayerMessage([1])
+            // else
+                // setWaitPlayerMessage(waitPlayerMessage[1])
         })
 
         socket.on('playerMovement', (msg) => {
-            console.log("imprimo msg: ", msg)
-            console.log("panelDisabled: ", panelDisabled)
-
+            // setWaitPlayerMessage(waitPlayerMessage[0])
             const { row, col } = traductorCelda(msg.repliedMessage.cell)
             const playerMark = msg.repliedMessage.mark
+            if (playerMark === turno)
+                setPanelDisabled(true)
+            else
+                setPanelDisabled(false)
+
             // const newBoard = [...board] // Y LUEGO MANIPULAR Y setBoard NO ES VALIDO !!!
             setBoard(prevBoard => {
                 setTurno(playerMark == "X" ? 0 : 1)
@@ -288,7 +301,7 @@ const PlayArena = () => {
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "blue"}}>
                 {/* // <Typography variant="h6" color="primary" gutterBottom> */}
-                    {waitPlayerMessage[0]}
+                    {waitPlayerMessage[turno]}
                 </Typography>
 
             </Box>
