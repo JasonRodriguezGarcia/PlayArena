@@ -60,13 +60,9 @@ const PlayArena = () => {
     const [endGame, setEndGame] = useState(false)
     const [endGameMessage, setEndGameMessage] = useState('')
     const [waitPlayerMessage, setWaitPlayerMessage] = useState(['', 'Esperando otro jugador ...'])
-
-        const [connected, setConnected] = useState(true);
-        // const [input, setInput]= useState('');
-        // const [messages, setMessages] = useState([]);
-        // const [selectRoom, setSelectRoom] = useState("Sala 1")
-        // const [selectNick, setSelectNick] = useState("Pepe")
-        const [nick, setNick] = useState(nicks[0])
+    const [waiting, setWaiting] = useState(false)
+    const [connected, setConnected] = useState(true);
+    const [nick, setNick] = useState(nicks[0])
     
     useEffect(() => {
         socket.on('connect', () => {
@@ -76,25 +72,30 @@ const PlayArena = () => {
         });
 
         socket.on('startGame', (msg) => {
-            console.log("imprimo msg: ", msg)
             debugger
+            console.log("imprimo msg: ", msg)
             setTurno(msg.turn)
             console.log("imprimo msg.turn: ", msg.turn)
             const nuevoTurno = msg.turn === 0 ? 1 : 0
             setTurno(nuevoTurno)
             // setWaitPlayerMessage(waitPlayerMessage[nuevoTurno])
             console.log("setTurno: ", turno)
+            const nuevoWaiting = msg.waiting ? msg.waiting : false
+            // if (nuevoWaiting)
+                setTextoComenzar(textoInicio[1]) 
+            setWaiting(nuevoWaiting)
             if (msg.startGame == true) {
-                setTextoComenzar(textoInicio[1])
+                // setTextoComenzar(textoInicio[1])
                 setEndGame(false)
                 setTurno(msg.turn)
-                // setWaitPlayerMessage([0])
-                if (turno == nuevoTurno)
-                    setPanelDisabled(false)
-                else
-                    setPanelDisabled(true)
             }
+            // setWaitPlayerMessage([0])
+            if (turno == nuevoTurno)
+                setPanelDisabled(false)
+            else
+                setPanelDisabled(true)
             // else
+                // setTextoComenzar
                 // setWaitPlayerMessage(waitPlayerMessage[1])
         })
 
@@ -184,18 +185,20 @@ const PlayArena = () => {
     }
 
     const handleComenzar = () => {
+        debugger
         if(textoComenzar === textoInicio[0]) { // comenzar
             socket.emit('startGame', {
                 room: sala,
                 nick: nick
             })
 
-            // setTextoComenzar(textoInicio[1])
+            setTextoComenzar(textoInicio[1])
             // setPanelDisabled(false)
             // setEndGame(false)
             // setTurno(0)
         }
         else {
+            setWaiting(false)
             setTextoComenzar(textoInicio[0]) // cancelar
             setPanelDisabled(true)
         }
@@ -301,7 +304,7 @@ const PlayArena = () => {
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "blue"}}>
                 {/* // <Typography variant="h6" color="primary" gutterBottom> */}
-                    {waitPlayerMessage[turno]}
+                    {waiting && waitPlayerMessage[1]}
                 </Typography>
 
             </Box>

@@ -68,24 +68,28 @@ async function startServer() {
       socket.on('startGame', async ({room, nick})=> {
         let startGame = false // creado startgame para cuando se juege contra el ordenador
         let turn
+        let waiting
         if (games[room].players == 0) {
           games[room].players +=1
           turn = 0
+          waiting = true
           console.log("turn: ", turn)
         } else if (games[room].players == 1) {
           games[room].players +=1
           turn = 1
+          waiting = false
         }
         console.log("games: ", games)
         console.log("turn: ", turn)
         // enviamos al nick el turno
-        socket.emit('startGame', {turn: turn});
         if (games[room].players == 2) {
-          startGame = true
-          // enviar a todos los de sala el comienzo del juego
-          io.to(room).emit('startGame', {startGame: startGame})
-          return
-        }
+            startGame = true
+            // enviar a todos los de sala el comienzo del juego
+            io.to(room).emit('startGame', {startGame: startGame})
+            return
+        } else
+        socket.emit('startGame', {turn: turn, waiting: waiting});
+
         // io.to(room).emit('waitPlayer', {startGame: startGame});
         // Enviar mensaje de vuelta SOLO al remitente
       })
