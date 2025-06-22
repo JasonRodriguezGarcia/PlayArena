@@ -43,58 +43,64 @@ async function startServer() {
 
     io.on("connection", (socket) => {
       
+
       socket.on ("joinRoom", (room) => {
-        console.log(`Socket ${socket.id} has joined ${room}`);
-        socket.join(room);
-        if (!games[room]) {
-            games[room] = {
-                board: Array.from({ length: 3 }, () => Array(3).fill('')),
-                turno: 0,
-                players: 0 // igual hay que cambiar en el futuro a array con nick de players
-            }
-        }
-        console.log("Creada sala: ", room)
+        // console.log(`Socket ${socket.id} has joined ${room}`);
+        // socket.join(room);
       });
+
       socket.on('clearRoom', async ({room})=> {
         if (games[room]) {
             games[room] = {
                 board: Array.from({ length: 3 }, () => Array(3).fill('')),
                 turno: 0,
-                players: 0 // igual hay que cambiar en el futuro a array con nick de players
+                maxPlayers: 2,
+                players: [] // igual hay que cambiar en el futuro a array con nick de players
             }
         }
       })
 
       socket.on('startGame', async ({room, nick})=> {
+        console.log(`Socket ${socket.id} has joined ${room}`);
+        socket.join(room);
         let startGame = false // creado startgame para cuando se juege contra el ordenador
-        let turn
+        // let turn
         let waiting
-        if (games[room].players == 0) {
-          games[room].players +=1
-          turn = 0
+        let playerMark
+        if (!games[room]) {
+            games[room] = {
+                board: Array.from({ length: 3 }, () => Array(3).fill('')),
+                turno: 0,
+                players: [] // igual hay que cambiar en el futuro a array con nick de players
+            }
+            console.log("Creada sala: ", room)
+        }
+        console.log("imprimo games[room] despues: ", games[room])
+        if (games[room].players.length == 0) { // si no hay jugadores, se añade jugador nick
+          games[room].players.push(nick)
           waiting = true
-          console.log("turn: ", turn)
-        } else if (games[room].players == 1) {
-          games[room].players +=1
-          turn = 1
+          playerMark = "X"
+        } else {
+          games[room].players.push(nick)
+          console.log("imprimo games[room] despues: ", games[room])
+        //   turn = 1
           waiting = false
+          playerMark = "O"
         }
         console.log("games: ", games)
-        console.log("turn: ", turn)
         // enviamos al nick el turno
-        if (games[room].players == 2) {
+        if (games[room].players.length == 2) {
             startGame = true
-            // enviar a todos los de sala el comienzo del juego
-            io.to(room).emit('startGame', {startGame: startGame})
+            // enviar a todos los de sala el comienzo del juego y también playerMark para el 2º jugador
+            io.to(room).emit('startGame', {startGame: startGame, players: games[room].players})
             return
         } else
-        socket.emit('startGame', {turn: turn, waiting: waiting});
-
-        // io.to(room).emit('waitPlayer', {startGame: startGame});
         // Enviar mensaje de vuelta SOLO al remitente
+        socket.emit('startGame', {waiting: waiting, playerMark: playerMark});
+        // io.to(room).emit('waitPlayer', {startGame: startGame});
       })
 
-      socket.on('playerMovement', async ({room, message, nick, timestamp})=> {
+      socket.on('playerMovement', async ({room, message, turn, nick, timestamp})=> {
         console.log("receiving: ", room, " - Celda ", message, nick);
         const game = games[room]
         if (!game)
@@ -108,13 +114,12 @@ async function startServer() {
         }
         const mark = turno === 0 ? "X": "O"
         board[row][col] = mark
-        game.turno = 1 - turno
-
-        const repliedMessage = { cell: message, mark: mark}
+        game.turno = 1 - game.turno
+        console.log("imprimo stringify(game): ", JSON.stringify(game))
+        const repliedMessage = { cell: message, mark, playedTurn: turn}
         console.log("sending: ", repliedMessage)
     
         // envia a todos los de la sala a excepcion del emisor
-        // socket.to(room).emit('playerMovement', {message, nick});
         // socket.to(room).emit('playerMovement', {repliedMessage, nick});
         // envia a todos los de la sala incluido el emisor
         io.to(room).emit('playerMovement', {repliedMessage, nick});

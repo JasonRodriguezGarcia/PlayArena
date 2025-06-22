@@ -16,14 +16,13 @@ import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000'); // Connect once
 
-// const rooms = ["Sala 1", "Sala 2", "Sala3"]
 const nicks = ["Pepe", "Manuel", "Lola", "Maria"]
 const salas = ['Sala 1', 'Sala 2', 'Sala 3']
 const juegos = ['3 en raya', 'Conecta 4', 'Hundir la flota']
 const jugadores = ['Jugador vs computer', 'Jugador 1 vs Jugador 2']
 
 const PlayArena = () => {
-    const [playerMark, setPlayerMark] = useState('X')
+    // const [playerMark, setPlayerMark] = useState('')
     const [variables, setVariables] = useState([
         {
             element: "Config Column",
@@ -55,104 +54,157 @@ const PlayArena = () => {
     const [textoInicio, setTextoInicio] = useState(['Comenzar !!', 'Cancelar !!'])
     const [textoComenzar, setTextoComenzar] = useState(textoInicio[0])
     const [panelDisabled, setPanelDisabled] = useState(true)
-    const [mensajeTurno, setMensajeTurno] = useState(['Su turno (X)','Turno otro Jugador (O)'])
-    const [turno, setTurno] = useState(0)
+    const [mensajeTurno, setMensajeTurno] = useState(['Su turno','Turno otro Jugador', ''])
+    const [turno, setTurno] = useState(2)
+    const [playerMark, setPlayerMark] = useState('')
     const [endGame, setEndGame] = useState(false)
     const [endGameMessage, setEndGameMessage] = useState('')
+    const [gameRunning, setGameRunning] = useState(false)
     const [waitPlayerMessage, setWaitPlayerMessage] = useState(['', 'Esperando otro jugador ...'])
     const [waiting, setWaiting] = useState(false)
     const [connected, setConnected] = useState(true);
     const [nick, setNick] = useState(nicks[0])
     
     useEffect(() => {
-        socket.on('connect', () => {
+        const handleConnect = () => {
+            // console.log('Connected to socket');
+            // setConnected(true);
+            // socket.emit('joinRoom', sala);
+        }
+        
+        const handleStartGame = (msg) => {
             console.log('Connected to socket');
             setConnected(true);
             socket.emit('joinRoom', sala);
-        });
 
-        socket.on('startGame', (msg) => {
-            debugger
             console.log("imprimo msg: ", msg)
-            setTurno(msg.turn)
-            console.log("imprimo msg.turn: ", msg.turn)
-            const nuevoTurno = msg.turn === 0 ? 1 : 0
-            setTurno(nuevoTurno)
-            // setWaitPlayerMessage(waitPlayerMessage[nuevoTurno])
-            console.log("setTurno: ", turno)
             const nuevoWaiting = msg.waiting ? msg.waiting : false
-            // if (nuevoWaiting)
-                setTextoComenzar(textoInicio[1]) 
+            setTextoComenzar(textoInicio[1]) 
             setWaiting(nuevoWaiting)
             if (msg.startGame == true) {
-                // setTextoComenzar(textoInicio[1])
                 setEndGame(false)
-                setTurno(msg.turn)
+            } else {
+                return
             }
-            // setWaitPlayerMessage([0])
-            if (turno == nuevoTurno)
+            if (msg.players[0] == nick) {
+                setPlayerMark("X")
+                setTurno(0)
                 setPanelDisabled(false)
-            else
+            } else {
+                setPlayerMark("O")
+                setTurno(1)
                 setPanelDisabled(true)
-            // else
-                // setTextoComenzar
-                // setWaitPlayerMessage(waitPlayerMessage[1])
+            }
+    }
+    
+    const handlePlayerMovement = (msg) => {
+        const playerMark = msg.repliedMessage.mark
+        const { row, col } = traductorCelda(msg.repliedMessage.cell)
+        setBoard(prevBoard => {
+            const newBoard = prevBoard.map(row => row.map(cell => ({ ...cell })));
+            newBoard[row][col] = {
+                cellContent: playerMark,
+                disabled: true
+            }
+            const result = checkEndGame(newBoard, playerMark)
+            if (result) {
+                setEndGame(true)
+                setEndGameMessage(`Ganador Jugador ${playerMark}`)
+                setPanelDisabled(true)
+                handleClearRoom()
+                setWaiting(false)
+                setTextoComenzar(textoInicio[0])
+            }
+            return newBoard
         })
+        // Ahora ajustamos turno y panel
+        if (msg.repliedMessage.playedTurn === 1 && nick === msg.nick) {
+            // si ya jugó en su turno y era el turno 1
+            setTurno(0)
+            setPanelDisabled(true)
+        } else if (msg.repliedMessage.playedTurn === 0 && nick === msg.nick) {
+            // si ya jugo en su turno y era el turno 0
+            setTurno(1)
+            setPanelDisabled(true)
+        } else {
+            setTurno(msg.repliedMessage.playedTurn)
+            setPanelDisabled(false) // te toca
+        }
+    }
 
-        socket.on('playerMovement', (msg) => {
-            // setWaitPlayerMessage(waitPlayerMessage[0])
-            const { row, col } = traductorCelda(msg.repliedMessage.cell)
-            const playerMark = msg.repliedMessage.mark
-            if (playerMark === turno)
-                setPanelDisabled(true)
-            else
-                setPanelDisabled(false)
+    const handleClearRoom = () => {
+        console.log('Clearing Room');
+        // socket.emit('ClearRoom', sala);
+        setBoard(
+            Array.from({ length: 3 }, () => (
+                Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
+            ))
+        )
+        // setEndGame(true)
+        // setEndGameMessage(`Ganador Jugador ${playerMark}`)
+        // setPanelDisabled(true)
+        // handleClearRoom()
+        // setWaiting(false)
+        // setTextoComenzar(textoInicio[0])
 
-            // const newBoard = [...board] // Y LUEGO MANIPULAR Y setBoard NO ES VALIDO !!!
-            setBoard(prevBoard => {
-                setTurno(playerMark == "X" ? 0 : 1)
-                const newBoard = prevBoard.map(row => row.map(cell => ({ ...cell })));
-                newBoard[row][col] = {
-                    cellContent: playerMark,
-                    disabled: true
-                }
-                const result = checkEndGame(newBoard, playerMark)
-                if (result) {
-                    setEndGame(true)
-                    setEndGameMessage(`Ganador Jugador ${playerMark}`)
-                    setPanelDisabled(true)
-                }
-                return newBoard
+    }
+
+    const handleDisconnect = () => {
+        console.log('Disconnected from socket');
+        setConnected(false);
+    }
+    socket.on('connect', handleConnect);
+    socket.on('startGame', handleStartGame)
+    socket.on('playerMovement', handlePlayerMovement)
+    socket.on('clearRoom', handleClearRoom);
+    socket.on('disconnect', handleDisconnect);
+    
+    return () => {
+        socket.off('connect');
+        socket.off('joinRoom');
+        socket.off('startGame');
+        socket.off('disconnect');
+        socket.off('playerMovement');
+};
+}, [nick, sala]);
+
+    const handleComenzar = () => {
+        // si esta en comenzar
+        if(textoComenzar === textoInicio[0]) { 
+            socket.emit('startGame', {
+                room: sala,
+                nick: nick
             })
-        })
+            setTextoComenzar(textoInicio[1])
+        }
+        else {
+            // esta en cancelar
+            setWaiting(false)
+            setTextoComenzar(textoInicio[0]) 
+            setPanelDisabled(true)
+        }
+    }
 
-        socket.on('disconnect', () => {
-            console.log('Disconnected from socket');
-            setConnected(false);
-        });
-
-        return () => {
-            socket.off('connect');
-            socket.off('disconnect');
-            socket.off('joinRoom');
-            socket.off('startGame');
-            socket.off('playerMovement');
-        };
-    }, []);
-    
-    const nicksSelect = nicks.map((nick, index) => (
-            <MenuItem key={index} value={nick}>{nick}</MenuItem>
-    ))
-    
     const sendChatRoom = (cell) => {
         socket.emit('playerMovement', {
-            // room: selectRoom,
             room: sala,
             message: cell,
+            turn: turno,
             nick: nick,
             timestamp: new Date()
 
-        }); // can pass in more data here
+        }) // can pass in more data here
+    }
+
+    const handleCellClick = (cell) => {
+        if (panelDisabled)
+            return
+        sendChatRoom(cell)
+    }
+    
+    const handleReiniciarSala = () => {
+        socket.emit('clearRoom', { room: sala })
+
     }
 
     const traductorCelda = (celda) => {
@@ -161,7 +213,7 @@ const PlayArena = () => {
         const col = celda % 3
         return { row, col }
     }
-
+    
     const salasSelect =  salas.map((sala, index) => (
         <MenuItem key={index} value={sala}>{sala}</MenuItem>
     ))
@@ -170,6 +222,10 @@ const PlayArena = () => {
     ))
     const jugadoresSelect =  jugadores.map((jugadores, index) => (
         <MenuItem key={index} value={jugadores}>{jugadores}</MenuItem>
+    ))
+    
+    const nicksSelect = nicks.map((nick, index) => (
+        <MenuItem key={index} value={nick}>{nick}</MenuItem>
     ))
     
     const handleChangeSalas = (e) => {
@@ -184,24 +240,9 @@ const PlayArena = () => {
 
     }
 
-    const handleComenzar = () => {
-        debugger
-        if(textoComenzar === textoInicio[0]) { // comenzar
-            socket.emit('startGame', {
-                room: sala,
-                nick: nick
-            })
-
-            setTextoComenzar(textoInicio[1])
-            // setPanelDisabled(false)
-            // setEndGame(false)
-            // setTurno(0)
-        }
-        else {
-            setWaiting(false)
-            setTextoComenzar(textoInicio[0]) // cancelar
-            setPanelDisabled(true)
-        }
+    const handleChangeNicks = (e) => {
+        setNick(e.target.value)
+        console.log("nick: ", e.target.value)
     }
 
     const checkEndGame = (boardToCheck, turnoTocheck) => {
@@ -222,17 +263,7 @@ const PlayArena = () => {
         return false
     }
 
-    const handleCellClick = (cell) => {
-        if (panelDisabled)
-            return
-        sendChatRoom(cell)
-    }
     
-    const handleReiniciarSala = () => {
-        socket.emit('clearRoom', {
-            room: sala
-        })
-    }
     return (
         <>
         <Box sx={{display: 'grid', height: '100vh', gridTemplateColumns: 'minmax(250px, 2fr) 10fr', gap: "30px",
@@ -290,7 +321,8 @@ const PlayArena = () => {
                         value={nick}
                         label="nicks"
                         disabled={textoComenzar === textoInicio[1]? true: false}
-                        onChange={(e)=> setNick(e.target.value)}
+                        // onChange={(e)=> setNick(e.target.value)}
+                        onChange={(e)=> handleChangeNicks(e)}
                         >
                         {nicksSelect}
                     </Select>                            
@@ -338,7 +370,22 @@ const PlayArena = () => {
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
-                    {panelDisabled ? null : mensajeTurno[turno]}
+                    Ficha Jugador: {playerMark}
+                </Typography>
+                
+                <Typography variant="h5" component="div" 
+                    sx={{margin: "0 0 1 0",  color: "white"}}
+                >
+                    {/* {gameRunning ?  "PARTIDA EN CURSO ..." : null} */}
+                    {/* {!endGame? null :  "PARTIDA EN CURSO ..."} */}
+                </Typography>
+                
+                <Typography variant="h5" component="div" 
+                    sx={{margin: "0 0 1 0",  color: "white"}}
+                >
+                    {/* {panelDisabled ? null : mensajeTurno[turno]} */}
+                    {/* {!endGame ? mensajeTurno[turno] + `${turno < 2 && (playerMark == "X" || playerMark == "O")? `(${playerMark})` : ''}` : null} */}
+                    {!endGame ? mensajeTurno[turno] : null}
                     {endGame ? endGameMessage: null}
                 </Typography>
                 
