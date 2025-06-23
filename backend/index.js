@@ -57,6 +57,11 @@ async function startServer() {
                 maxPlayers: 2,
                 players: [] // igual hay que cambiar en el futuro a array con nick de players
             }
+            console.log("Room cleared: ")
+            // enviar a todos los de sala el comienzo del juego y también playerMark para el 2º jugador
+            io.to(room).emit('clearRoom')
+        } else {
+            console.log("Room already empty")
         }
       })
 
