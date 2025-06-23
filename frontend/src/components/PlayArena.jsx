@@ -82,6 +82,7 @@ const PlayArena = () => {
             setTextoComenzar(textoInicio[1]) 
             setWaiting(nuevoWaiting)
             if (msg.startGame == true) {
+                setGameRunning(true)
                 setEndGame(false)
             } else {
                 return
@@ -106,14 +107,18 @@ const PlayArena = () => {
                 cellContent: playerMark,
                 disabled: true
             }
-            const result = checkEndGame(newBoard, playerMark)
-            if (result) {
+            const endGame = checkEndGame(newBoard, playerMark)
+            if (endGame) {
                 setEndGame(true)
-                setEndGameMessage(`Ganador Jugador ${playerMark}`)
+                setGameRunning(false) //
                 setPanelDisabled(true)
-                handleClearRoom()
-                setWaiting(false)
+                // setWaiting(false)
                 setTextoComenzar(textoInicio[0])
+                // handleReiniciarSala()
+                setEndGameMessage(`Ganador Jugador ${playerMark}`)
+                // setTimeout(()=> {
+                //     setEndGameMessage('')
+                // }, 2000)
             }
             return newBoard
         })
@@ -134,54 +139,51 @@ const PlayArena = () => {
 
     const handleClearRoom = () => {
         console.log('Clearing Room');
-        // socket.emit('ClearRoom', sala);
         setBoard(
             Array.from({ length: 3 }, () => (
                 Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
             ))
         )
-        // setEndGame(true)
-        // setEndGameMessage(`Ganador Jugador ${playerMark}`)
-        // setPanelDisabled(true)
-        // handleClearRoom()
-        // setWaiting(false)
-        // setTextoComenzar(textoInicio[0])
+        setEndGame(true)
+        setGameRunning(false)
+        setPlayerMark('')
+        setEndGameMessage(``)
 
+        setPanelDisabled(true)
+        setWaiting(false)
+        setTextoComenzar(textoInicio[0])
     }
 
     const handleDisconnect = () => {
-        console.log('Disconnected from socket');
+        console.log('Disconnected from socket')
         setConnected(false);
     }
-    socket.on('connect', handleConnect);
+    socket.on('connect', handleConnect)
     socket.on('startGame', handleStartGame)
     socket.on('playerMovement', handlePlayerMovement)
-    socket.on('clearRoom', handleClearRoom);
-    socket.on('disconnect', handleDisconnect);
+    socket.on('clearRoom', handleClearRoom)
+    socket.on('disconnect', handleDisconnect)
     
     return () => {
-        socket.off('connect');
-        socket.off('joinRoom');
-        socket.off('startGame');
-        socket.off('disconnect');
-        socket.off('playerMovement');
-};
+        socket.off('connect')
+        socket.off('joinRoom')
+        socket.off('startGame')
+        socket.off('disconnect')
+        socket.off('playerMovement')
+    }
 }, [nick, sala]);
 
     const handleComenzar = () => {
+        socket.emit('startGame', {
+            room: sala,
+            nick: nick
+        })
         // si esta en comenzar
         if(textoComenzar === textoInicio[0]) { 
-            socket.emit('startGame', {
-                room: sala,
-                nick: nick
-            })
             setTextoComenzar(textoInicio[1])
         }
         else {
-            // esta en cancelar
-            setWaiting(false)
-            setTextoComenzar(textoInicio[0]) 
-            setPanelDisabled(true)
+            handleReiniciarSala()
         }
     }
 
@@ -204,7 +206,6 @@ const PlayArena = () => {
     
     const handleReiniciarSala = () => {
         socket.emit('clearRoom', { room: sala })
-
     }
 
     const traductorCelda = (celda) => {
@@ -335,7 +336,6 @@ const PlayArena = () => {
                 </Button>
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "blue"}}>
-                {/* // <Typography variant="h6" color="primary" gutterBottom> */}
                     {waiting && waitPlayerMessage[1]}
                 </Typography>
 
@@ -349,10 +349,10 @@ const PlayArena = () => {
                 >
                     Juego {juego}
                 </Typography>
+
                 <Box sx={{display: "grid", gridTemplateColumns: "repeat(3, 150px)", gridTemplateRows: "repeat(3, 150px)",
                     gap: 1, p: 1, m: 1, border: "1px solid", borderRadius: "5px",
                     backgroundColor: "#66baff", opacity: panelDisabled ? 0.3 : null
-                    
                 }}>
                         {board && board.flat().map((cell, index) => (
                             <Box key={index} sx={{border: "1px solid", borderRadius: "5px", alignContent: "center",
@@ -376,15 +376,13 @@ const PlayArena = () => {
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
-                    {/* {gameRunning ?  "PARTIDA EN CURSO ..." : null} */}
+                    {gameRunning ?  "PARTIDA EN CURSO ..." : null}
                     {/* {!endGame? null :  "PARTIDA EN CURSO ..."} */}
                 </Typography>
                 
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
-                    {/* {panelDisabled ? null : mensajeTurno[turno]} */}
-                    {/* {!endGame ? mensajeTurno[turno] + `${turno < 2 && (playerMark == "X" || playerMark == "O")? `(${playerMark})` : ''}` : null} */}
                     {!endGame ? mensajeTurno[turno] : null}
                     {endGame ? endGameMessage: null}
                 </Typography>
