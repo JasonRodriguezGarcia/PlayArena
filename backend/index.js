@@ -12,8 +12,26 @@ import playarenaRouter from './routes/playarena.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// const allowedOrigins = ['http://localhost:5173'];
+// const allowedOrigins = ['https://render-project-frontend.onrender.com'];
+const allowedOrigins = [`${process.env.FRONTEND_URL_RENDER}`];
+
+app.use(cors({
+  origin: function(origin, callback){
+    // allow requests with no origin (like curl, postman)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true, // if you need to send cookies/auth headers
+}));
+
+
 // Middleware
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
 
 async function startServer() {

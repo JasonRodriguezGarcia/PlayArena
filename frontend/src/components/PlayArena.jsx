@@ -13,9 +13,10 @@ import {
     
 } from '@mui/material';
 import { io } from 'socket.io-client';
-
+const VITE_BACKEND_URL_RENDER = import.meta.env.VITE_BACKEND_URL_RENDER
 // const socket = io('http://localhost:5000'); // Connect once
-const socket = io('https://playarena-lyi6.onrender.com'); // Connect once
+// const socket = io('https://playarena-lyi6.onrender.com'); // Connect once
+const socket = io(`${VITE_BACKEND_URL_RENDER}`); // Connect once
 
 const nicks = ["Pepe", "Manuel", "Lola", "Maria"]
 const salas = ['Sala 1', 'Sala 2', 'Sala 3']
