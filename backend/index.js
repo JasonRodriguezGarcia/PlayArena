@@ -86,6 +86,7 @@ async function startServer() {
             //     maxPlayers: 2,
             //     players: [] // igual hay que cambiar en el futuro a array con nick de players
             // }
+            games.splice(buscarSala, 1)
             console.log("Room en backend clearRoom: ", room)
             console.log("Games: ", games)
             // let index = games.indexOf(room);
@@ -119,17 +120,21 @@ async function startServer() {
             playerMark = "X" // Es el primer jugado de la sala recien creada
             socket.emit('startGame', {waiting: waiting, playerMark: playerMark});
 
-        } else if (buscarSala.players.length < 2 && !buscarSala.players.includes(nick)) { // hay ya una sala con jugador y el nuevo no esta repetido
+        } else 
+        // hay ya una sala con jugador y el nuevo no esta repetido
+        if (buscarSala.players.length < 2 && !buscarSala.players.includes(nick)) { // hay ya una sala con jugador y el nuevo no esta repetido
             buscarSala.players.push(nick)
             console.log("imprimo objeto nuevaSala ya existente: ", buscarSala)
             waiting = false
             playerMark = "O"
             startGame = true
             io.to(room).emit('startGame', {startGame: startGame, players: buscarSala.players})
-        } else {
+        } 
+        else {
             console.log("paso por aqui")
-            socket.emit('startGame', {startGame: false, playerMark: playerMark});
+            socket.emit('startGame', {startGame: false, abortGame: true, playerMark: playerMark});
         }
+      
         // console.log("imprimo buscarsala.players.length: ", buscarSala != undefined ? buscarSala.players.length : "vacia")
         // console.log("imprimo games[room] despues: ", games[room])
         // if (games[room].players.length == 0) { // si no hay jugadores, se añade jugador nick

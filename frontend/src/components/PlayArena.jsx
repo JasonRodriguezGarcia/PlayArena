@@ -75,7 +75,7 @@ const PlayArena = () => {
         }
         
         const handleStartGame = (msg) => {
-            if (!msg.startGame) {
+            if (msg.abortGame) {
                 setTextoComenzar(textoInicio[0])
                 return
             }
@@ -336,13 +336,13 @@ const PlayArena = () => {
                         {nicksSelect}
                     </Select>                            
                 </FormControl>
-                <Button variant="contained" onClick={handleComenzar}>
+                <Button data-testId="start-btn" variant="contained" onClick={handleComenzar}>
                     {textoComenzar}
                 </Button>
                 <Button variant="contained" onClick={handleReiniciarSala}>
                     Reiniciar sala
                 </Button>
-                <Typography variant="h5" component="div" 
+                <Typography data-testID="waitMessage-h5" variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "blue"}}>
                     {waiting && waitPlayerMessage[1]}
                 </Typography>
@@ -381,14 +381,14 @@ const PlayArena = () => {
                     Ficha Jugador: {playerMark}
                 </Typography>
                 
-                <Typography variant="h5" component="div" 
+                <Typography data-testID="gameRunning-h5" variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
                     {gameRunning ?  "PARTIDA EN CURSO ..." : null}
                     {/* {!endGame? null :  "PARTIDA EN CURSO ..."} */}
                 </Typography>
                 
-                <Typography variant="h5" component="div" 
+                <Typography data-testID="gameTurn-h5" variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
                     {!endGame ? mensajeTurno[turno] : null}
