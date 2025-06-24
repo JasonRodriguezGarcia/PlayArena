@@ -75,6 +75,10 @@ const PlayArena = () => {
         }
         
         const handleStartGame = (msg) => {
+            if (!msg.startGame) {
+                setTextoComenzar(textoInicio[0])
+                return
+            }
             console.log('Connected to socket');
             setConnected(true);
             socket.emit('joinRoom', sala);
@@ -109,18 +113,19 @@ const PlayArena = () => {
                 cellContent: playerMark,
                 disabled: true
             }
-            const endGame = checkEndGame(newBoard, playerMark)
-            if (endGame) {
+            const theEndGame = checkEndGame(newBoard, playerMark)
+            if (theEndGame) {
                 setEndGame(true)
                 setGameRunning(false) //
                 setPanelDisabled(true)
                 // setWaiting(false)
                 setTextoComenzar(textoInicio[0])
-                // handleReiniciarSala()
+                handleReiniciarSala()
                 setEndGameMessage(`Ganador Jugador ${playerMark}`)
                 // setTimeout(()=> {
                 //     setEndGameMessage('')
                 // }, 2000)
+
             }
             return newBoard
         })
@@ -185,6 +190,7 @@ const PlayArena = () => {
             setTextoComenzar(textoInicio[1])
         }
         else {
+            setTextoComenzar(textoInicio[0])
             handleReiniciarSala()
         }
     }
