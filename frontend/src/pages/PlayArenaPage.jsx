@@ -23,7 +23,7 @@ const salas = ['Sala 1', 'Sala 2', 'Sala 3']
 const juegos = ['3 en raya', 'Conecta 4', 'Hundir la flota']
 const jugadores = ['Jugador vs computer', 'Jugador 1 vs Jugador 2']
 
-const PlayArena = () => {
+const PlayArenaPage = () => {
     // const [playerMark, setPlayerMark] = useState('')
     const [variables, setVariables] = useState([
         {
@@ -115,16 +115,17 @@ const PlayArena = () => {
             }
             const theEndGame = checkEndGame(newBoard, playerMark)
             if (theEndGame) {
-                setEndGame(true)
-                setGameRunning(false) //
+                debugger
+                // setEndGame(true)
                 setPanelDisabled(true)
                 // setWaiting(false)
                 setTextoComenzar(textoInicio[0])
                 handleReiniciarSala()
                 setEndGameMessage(`Ganador Jugador ${playerMark}`)
-                // setTimeout(()=> {
-                //     setEndGameMessage('')
-                // }, 2000)
+                setTimeout(()=> {
+                    setGameRunning(false) //
+                    setEndGameMessage('')
+                }, 5000)
 
             }
             return newBoard
@@ -154,7 +155,7 @@ const PlayArena = () => {
         setEndGame(true)
         setGameRunning(false)
         setPlayerMark('')
-        setEndGameMessage(``)
+        // setEndGameMessage(``)
 
         setPanelDisabled(true)
         setWaiting(false)
@@ -405,4 +406,4 @@ const PlayArena = () => {
 
 }
 
-export default PlayArena
+export default PlayArenaPage

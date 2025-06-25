@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import PlayArena from './pages/PlayArena'
+import PlayArenaPage from './pages/PlayArenaPage'
 import MainPage from './pages/MainPage';
 // import Test from './components/test'
 // import Test2 from './components/Test2'
@@ -15,7 +15,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainPage />} />
-        <Route path="/game" element={<PlayArena />} />      
+        <Route path="/game" element={<PlayArenaPage />} />      
       </Routes>
     </BrowserRouter>
     </>
