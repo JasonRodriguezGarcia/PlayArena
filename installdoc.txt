@@ -40,4 +40,8 @@ cambiamos en package.json en scripts o añadimos linea nueva
 
 npm run dev 
 
-    
+frontend
+npm install react-router-dom
+ó
+npm install react-router-dom@6
+

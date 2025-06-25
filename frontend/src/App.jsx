@@ -1,20 +1,23 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import PlayArena from './components/PlayArena'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import PlayArena from './pages/PlayArena'
+import MainPage from './pages/MainPage';
 // import Test from './components/test'
 // import Test2 from './components/Test2'
 
 function App() {
   const [count, setCount] = useState(0)
-//   const [count, setCount] = useState([])
 
   return (
     <>
-        <PlayArena />
-        {/* <Test /> */}
-        {/* <Test2 /> */}
+        {/* <PlayArena /> */}
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/game" element={<PlayArena />} />      
+      </Routes>
+    </BrowserRouter>
     </>
   )
 }
