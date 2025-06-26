@@ -13,7 +13,7 @@ cd frontend
 npm install
 npm run dev
 
-npm install @mui/material @emotion/react @emotion/styled
+npm install @mui/material @emotion/react @emotion/styled @mui/icons-material
 npm install socket.io-client
 
 
