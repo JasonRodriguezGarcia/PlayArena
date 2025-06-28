@@ -340,9 +340,9 @@ const PlayArenaPage = () => {
                 <Button data-testId="start-btn" variant="contained" onClick={handleComenzar}>
                     {textoComenzar}
                 </Button>
-                <Button variant="contained" onClick={handleReiniciarSala}>
+                {/* <Button variant="contained" onClick={handleReiniciarSala}>
                     Reiniciar sala
-                </Button>
+                </Button> */}
                 <Typography data-testID="waitMessage-h5" variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "blue"}}>
                     {waiting && waitPlayerMessage[1]}
