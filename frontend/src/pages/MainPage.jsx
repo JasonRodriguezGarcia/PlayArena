@@ -21,22 +21,27 @@ function MainPage() {
   const navigate = useNavigate()
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
+  const [logged, setLogged] = useState(false)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
   const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
+      setAnchorElUser(event.currentTarget);
+    };
+    
+    const handleCloseNavMenu = () => {
+      console.log("pulsado Menu!! ")
     setAnchorElNav(null);
   };
 
   const handleCloseUserMenu = () => {
+      console.log("pulsado UserMenu!! ")
     setAnchorElUser(null);
   };
 
+  const handleClickedPage = (e) => {
+  }
   return (
     <Box sx={{ width: "100vw", height: "100vh", display: {xs: 'none', md: 'flex'}}}>
 
@@ -92,7 +97,7 @@ function MainPage() {
             >
               {pages.map((page) => (
                 <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
+                  <Typography sx={{ textAlign: 'center' }} onClick={(e)=> handleClickedPage(e)}> {page}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -127,7 +132,7 @@ function MainPage() {
               </Button>
             ))}
           </Box>
-          <Box sx={{ flexGrow: 0 }}>
+          <Box sx={{ flexGrow: 0, display: logged ? 'block' : 'none' }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
@@ -156,9 +161,41 @@ function MainPage() {
               ))}
             </Menu>
           </Box>
+          <Box sx={{ flexGrow: 0, display: logged ? 'none' : 'block'}}>
+            <Tooltip title="Sign up">
+                <Button
+                    onClick={handleCloseUserMenu}
+                    sx={{ m: 2, color: 'white', display: 'block', "&:hover": {backgroundColor: 'lightgrey', color: "black"},
+                    "&:selected": {backgroundColor: "grey"}
+                    }}
+                >
+                    Sign Up
+                </Button>
+
+            </Tooltip>
+          </Box>
+
         </Toolbar>
       </Container>
-      <button onClick={()=> navigate('/game')}>Ir a Game</button>
+      {/* <button onClick={()=> navigate('/game')}>Ir a Game</button>
+      <button onClick={()=> setLogged(!logged)}>Act/des logged</button> */}
+    <Button
+        onClick={()=> navigate('/game')}
+        sx={{ width: { xs: '10%', sm: '100px' }, m: 2, color: 'white', display: 'block', "&:hover": {backgroundColor: 'lightgrey', color: "black"},
+        "&:active": {backgroundColor: "grey"}
+        }}
+    >
+        Ir a Game
+    </Button>
+    <Button
+        onClick={()=> setLogged(!logged)}
+        sx={{ width: { xs: '30%', sm: '100px' }, m: 2, color: 'white', display: 'block', "&:hover": {backgroundColor: 'lightgrey', color: "black"},
+        "&:active": {backgroundColor: "grey"}
+        }}
+    >
+        Act/des logged
+    </Button>
+
     </AppBar>
 
     </Box>
