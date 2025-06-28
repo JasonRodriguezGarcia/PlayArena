@@ -4,10 +4,10 @@ describe('Game action', () => {
     });
     
     it('starts wait state for next player to join room', () => {
-        cy.get('[data-testId="start-btn"]').click();
+        cy.get('[data-testid="start-btn"]').click();
 
         // Confirm the success message appears
-        cy.get('[data-testId="waitMessage-h5"]').contains('Esperando otro jugador ...');
+        cy.get('[data-testid="waitMessage-h5"]').contains('Esperando otro jugador ...');
     });
   
 

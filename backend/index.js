@@ -173,8 +173,8 @@ async function startServer() {
         if (board[row][col] !== '') {
             return; // celda ocupada
         }
-        const mark = turno === 0 ? "X": "O"
-        board[row][col] = mark
+        const mark = turno === 0 ? {mark: "X", color: "green"}: {mark: "O", color: "red"}
+        board[row][col] = mark.mark
         tableroJuego.turno = 1 - tableroJuego.turno
         console.log("imprimo tableroJuego: ", JSON.stringify(tableroJuego))
         const repliedMessage = { cell: message, mark, playedTurn: turn}

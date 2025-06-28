@@ -24,7 +24,6 @@ const juegos = ['3 en raya', 'Conecta 4', 'Hundir la flota']
 const jugadores = ['Jugador vs computer', 'Jugador 1 vs Jugador 2']
 
 const PlayArenaPage = () => {
-    // const [playerMark, setPlayerMark] = useState('')
     const [variables, setVariables] = useState([
         {
             element: "Config Column",
@@ -47,7 +46,7 @@ const PlayArenaPage = () => {
 
     const [board, setBoard] = useState(
         Array.from({ length: 3 }, () => (
-            Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
+            Array.from({ length: 3 }, () => ({ cellContent: {mark: '', color: ''}, disabled: false }))
         ))
     );
     const [sala, setSala] = useState(salas[0])
@@ -58,7 +57,8 @@ const PlayArenaPage = () => {
     const [panelDisabled, setPanelDisabled] = useState(true)
     const [mensajeTurno, setMensajeTurno] = useState(['Su turno','Turno otro Jugador', ''])
     const [turno, setTurno] = useState(2)
-    const [playerMark, setPlayerMark] = useState('')
+    // const [playerMark, setPlayerMark] = useState('')
+    const [playerMark, setPlayerMark] = useState({})
     const [endGame, setEndGame] = useState(false)
     const [endGameMessage, setEndGameMessage] = useState('')
     const [gameRunning, setGameRunning] = useState(false)
@@ -94,11 +94,11 @@ const PlayArenaPage = () => {
                 return
             }
             if (msg.players[0] == nick) {
-                setPlayerMark("X")
+                setPlayerMark({mark: "X", color: "green"})
                 setTurno(0)
                 setPanelDisabled(false)
             } else {
-                setPlayerMark("O")
+                setPlayerMark({mark: "O", color: "red"})
                 setTurno(1)
                 setPanelDisabled(true)
             }
@@ -111,20 +111,23 @@ const PlayArenaPage = () => {
             const newBoard = prevBoard.map(row => row.map(cell => ({ ...cell })));
             newBoard[row][col] = {
                 cellContent: playerMark,
+                // queda el color
                 disabled: true
             }
-            const theEndGame = checkEndGame(newBoard, playerMark)
+            const theEndGame = checkEndGame(newBoard, playerMark.mark)
             if (theEndGame) {
                 debugger
-                // setEndGame(true)
+                setEndGameMessage(`Ganador Jugador ${playerMark.mark}`)
+                setEndGame(true)
                 setPanelDisabled(true)
                 // setWaiting(false)
                 setTextoComenzar(textoInicio[0])
-                handleReiniciarSala()
-                setEndGameMessage(`Ganador Jugador ${playerMark}`)
+                console.log("pasa por aqui")
                 setTimeout(()=> {
+                    console.log("pasa tambien por aqui")
                     setGameRunning(false) //
                     setEndGameMessage('')
+                    handleReiniciarSala()
                 }, 5000)
 
             }
@@ -149,13 +152,13 @@ const PlayArenaPage = () => {
         console.log('Clearing Room');
         setBoard(
             Array.from({ length: 3 }, () => (
-                Array.from({ length: 3 }, () => ({ cellContent: '', disabled: false }))
+                Array.from({ length: 3 }, () => ({ cellContent: {mark: '', color: ''}, disabled: false }))
             ))
         )
         setEndGame(true)
         setGameRunning(false)
-        setPlayerMark('')
-        // setEndGameMessage(``)
+        // setPlayerMark('')
+        setPlayerMark({})
 
         setPanelDisabled(true)
         setWaiting(false)
@@ -258,17 +261,18 @@ const PlayArenaPage = () => {
     const checkEndGame = (boardToCheck, turnoTocheck) => {
         for (let index = 0; index < boardToCheck.length; index++) {
             // horizontal check
-            if (boardToCheck[index][0].cellContent == turnoTocheck && boardToCheck[index][1].cellContent == turnoTocheck && boardToCheck[index][2].cellContent == turnoTocheck)
+            if (boardToCheck[index][0].cellContent.mark == turnoTocheck && boardToCheck[index][1].cellContent.mark== turnoTocheck && boardToCheck[index][2].cellContent.mark== turnoTocheck) {
                 return true
+            }
             // vertical check
-            if (boardToCheck[0][index].cellContent == turnoTocheck && boardToCheck[1][index].cellContent == turnoTocheck && boardToCheck[2][index].cellContent == turnoTocheck)
+            if (boardToCheck[0][index].cellContent.mark== turnoTocheck && boardToCheck[1][index].cellContent.mark== turnoTocheck && boardToCheck[2][index].cellContent.mark== turnoTocheck)
                 return true
         }
         // diagonal1 check
-            if (boardToCheck[0][0].cellContent == turnoTocheck && boardToCheck[1][1].cellContent == turnoTocheck && boardToCheck[2][2].cellContent == turnoTocheck)
+            if (boardToCheck[0][0].cellContent.mark== turnoTocheck && boardToCheck[1][1].cellContent.mark== turnoTocheck && boardToCheck[2][2].cellContent.mark== turnoTocheck)
                 return true
         // diagonal2 check
-            if (boardToCheck[2][0].cellContent == turnoTocheck && boardToCheck[1][1].cellContent == turnoTocheck && boardToCheck[0][2].cellContent == turnoTocheck)
+            if (boardToCheck[2][0].cellContent.mark== turnoTocheck && boardToCheck[1][1].cellContent.mark== turnoTocheck && boardToCheck[0][2].cellContent.mark== turnoTocheck)
                 return true
         return false
     }
@@ -337,13 +341,13 @@ const PlayArenaPage = () => {
                         {nicksSelect}
                     </Select>                            
                 </FormControl>
-                <Button data-testId="start-btn" variant="contained" onClick={handleComenzar}>
+                <Button data-testid="start-btn" variant="contained" onClick={handleComenzar}>
                     {textoComenzar}
                 </Button>
                 {/* <Button variant="contained" onClick={handleReiniciarSala}>
                     Reiniciar sala
                 </Button> */}
-                <Typography data-testID="waitMessage-h5" variant="h5" component="div" 
+                <Typography data-testid="waitMessage-h5" variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "blue"}}>
                     {waiting && waitPlayerMessage[1]}
                 </Typography>
@@ -371,7 +375,7 @@ const PlayArenaPage = () => {
                                 }}
                                 onClick={()=> handleCellClick(index)}
                             >
-                                    <p>{cell.cellContent}</p>
+                                    <p style={{color: cell.cellContent.color}}>{cell.cellContent.mark}</p>
                             </Box>
                         ))}
                 </Box>
@@ -379,21 +383,21 @@ const PlayArenaPage = () => {
                 <Typography variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
-                    Ficha Jugador: {playerMark}
+                    Ficha Jugador: <span style={{color: playerMark.color}}>{playerMark.mark}</span>
                 </Typography>
                 
-                <Typography data-testID="gameRunning-h5" variant="h5" component="div" 
+                <Typography data-testid="gameRunning-h5" variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
                     {gameRunning ?  "PARTIDA EN CURSO ..." : null}
-                    {/* {!endGame? null :  "PARTIDA EN CURSO ..."} */}
                 </Typography>
                 
-                <Typography data-testID="gameTurn-h5" variant="h5" component="div" 
+                <Typography data-testid="gameTurn-h5" variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
-                    {!endGame ? mensajeTurno[turno] : null}
-                    {endGame ? endGameMessage: null}
+                    {/* {!endGame ? mensajeTurno[turno] : null} */}
+                    {/* {endGame ? endGameMessage: null} */}
+                    {!endGame ? mensajeTurno[turno] : endGameMessage}
                 </Typography>
             </Box>
         </Box>

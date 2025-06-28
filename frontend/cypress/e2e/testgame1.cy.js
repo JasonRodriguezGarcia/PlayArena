@@ -4,11 +4,11 @@ describe('Game action', () => {
     });
     
     it('another player join the first to a room and we join later', () => {
-        cy.get('[data-testId="start-btn"]').click();
+        cy.get('[data-testid="start-btn"]').click();
 
         // Confirm the success message appears
-        cy.get('[data-testId="gameRunning-h5"]').contains('PARTIDA EN CURSO ...');
-        cy.get('[data-testId="gameTurn-h5"]').contains('Turno otro Jugador');
+        cy.get('[data-testid="gameRunning-h5"]').contains('PARTIDA EN CURSO ...');
+        cy.get('[data-testid="gameTurn-h5"]').contains('Turno otro Jugador');
     });
   
 
