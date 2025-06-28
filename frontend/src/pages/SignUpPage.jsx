@@ -14,18 +14,30 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import LoginComponent from '../components/LoginComponent';
 
-
-function MainPage() {
+function SignUpPage() {
   
   return (
-    <Box sx={{ width: "100vw", height: "100vh", backgroundColor: "blue"}}>
+    <Box sx={{ width: "100vw", height: "100vh", backgroundColor: "blue", display: "flex", flexDirection: "column"}}>
 
-        <Box sx={{ width: "100%", height: "10%", display: {xs: 'none', md: 'flex'}}}>
+        <Box sx={{height: "10vh", display: {xs: 'none', md: 'flex'}}}>
             <MenuBarComponent />
         </Box>
+        <Box 
+            sx={{
+                height: '90vh',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}
+        >
+            <LoginComponent />
 
+        </Box>
     </Box>
   );
 }
-export default MainPage;
+export default SignUpPage;

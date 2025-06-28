@@ -16,16 +16,16 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 
 
-function MainPage() {
+function LoginPage() {
   
   return (
-    <Box sx={{ width: "100vw", height: "100vh", backgroundColor: "blue"}}>
+    <Box sx={{ width: "100vw", height: "100vh", backgroundColor: "blue", display: "flex", flexDirection: "column"}}>
 
-        <Box sx={{ width: "100%", height: "10%", display: {xs: 'none', md: 'flex'}}}>
+        <Box sx={{ height: "10vh", display: {xs: 'none', md: 'flex'}}}>
             <MenuBarComponent />
         </Box>
-
+<h1 style={{ color: "white" }}>Estoy en LOGIN</h1>
     </Box>
   );
 }
-export default MainPage;
+export default LoginPage;
