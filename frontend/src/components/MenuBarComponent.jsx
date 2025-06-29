@@ -25,7 +25,7 @@ const MenuBarComponent = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
 //   const [logged, setLogged] = useState(false)
-    const {logged, userNick} = useContext(LoginContext)
+    const {logged, setLogged, userNick, setUserNick} = useContext(LoginContext)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -34,23 +34,56 @@ const MenuBarComponent = () => {
       setAnchorElUser(event.currentTarget);
     };
     
-    const handleCloseNavMenu = () => {
-      console.log("pulsado Menu!! ")
+    const handleCloseNavMenu = (e) => {
+      console.log("pulsado Menu!! : ", e)
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = (e) => {
-      console.log("pulsado UserMenu!! ")
-      
-    setAnchorElUser(null);
-  };
+    const handleCloseUserMenu = (setting) => {
+        console.log("pulsado UserMenu!! :", setting)
+        switch (setting) {
+            // case "Profile":
+            //     navigate("/games");
+            //     break;
+            // case "Account":
+            //     navigate("/pricing");
+            //     break;
+            case "Logout":
+                setLogged(false)
+                setUserNick('')
+                navigate("/");
+                break;
+            default:
+                break;
+        }
+        
+        setAnchorElUser(null);
+    };
 
-  const handleClickedPage = (e) => {
-  }
+    const handleClickedPage = (page) => {
+        console.log("Página pulsada:", page);
 
-  const handleSignUp = () => {
+        switch (page) {
+            case "Games":
+                navigate("/games");
+                break;
+            case "Pricing":
+                navigate("/pricing");
+                break;
+            // case "About":
+            //     navigate("/about");
+            //     break;
+            default:
+                break;
+        }
+        setAnchorElNav(null); // cerrar menú móvil si estaba abierto
+    }
 
-  }
+  // filtramos las páginas y game aparece si estamos logeados
+  const filteredPages = pages.filter(page => {
+    if (page === "Games") return logged;
+    return true;
+    });
   return (
 
     <AppBar position="static">
@@ -77,9 +110,9 @@ const MenuBarComponent = () => {
             }}
           >
             <HomeIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
-            LOGO
+            PlayArena
           </Typography>
-
+{/* MENÚ MÓVIL */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
@@ -107,14 +140,15 @@ const MenuBarComponent = () => {
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography sx={{ textAlign: 'center' }} onClick={(e)=> handleClickedPage(e)}> {page}</Typography>
+              {/* {pages.map((page) => ( */}
+              {filteredPages.map((page) => (
+                <MenuItem key={page} onClick={()=> handleClickedPage(page)}>
+                  <Typography sx={{ textAlign: 'center' }}> {page}</Typography>
                 </MenuItem>
               ))}
             </Menu>
           </Box>
-          {/* MODO MOVIL */}
+          {/* LOGO MOVIL */}
           <Typography
             variant="h5"
             noWrap
@@ -135,13 +169,16 @@ const MenuBarComponent = () => {
             }}
           >
             <HomeIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-            LOGO
+            PlayArena
           </Typography>
+
+          {/* MENU DESKTOP */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
+            {/* {pages.map((page) => ( */}
+            {filteredPages.map((page) => (
               <Button
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={()=>handleClickedPage(page)}
                 sx={{ my: 2, color: 'white', display: 'block', "&:hover": {backgroundColor: 'lightgrey', color: "black"},
                     "&:selected": {backgroundColor: "grey"} }}
               >
@@ -149,6 +186,8 @@ const MenuBarComponent = () => {
               </Button>
             ))}
           </Box>
+
+          {/* USUARIO LOGEADO */}
           <Box sx={{ flexGrow: 0, display: logged ? 'block' : 'none' }}>
             <Tooltip title="Open settings">
                 <Box sx={{ display: "flex", alignItems: "center"}}>
@@ -184,7 +223,7 @@ const MenuBarComponent = () => {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={(e)=> handleCloseUserMenu(e)}>
+                <MenuItem key={setting} onClick={()=> handleCloseUserMenu(setting)}>
                   <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
                 </MenuItem>
               ))}
@@ -221,14 +260,14 @@ const MenuBarComponent = () => {
 
         </Toolbar>
       </Container>
-    <Button
+    {/* <Button
         onClick={()=> navigate('/game')}
         sx={{ width: { xs: '10%', sm: '100px' }, m: 2, color: 'white', display: 'block', "&:hover": {backgroundColor: 'lightgrey', color: "black"},
         "&:active": {backgroundColor: "grey"}
         }}
     >
         Ir a Game
-    </Button>
+    </Button> */}
     {/* <Button
         onClick={()=> setLogged(!logged)}
         sx={{ width: { xs: '30%', sm: '100px' }, m: 2, color: 'white', display: 'block', "&:hover": {backgroundColor: 'lightgrey', color: "black"},

@@ -140,12 +140,12 @@ const SignUpComponent = ({ language }) => {
 
     return (
         <>
-            {isValidToken && isValidToken ? 
+            {/* {isValidToken && isValidToken ? 
                 <h2 style = {{ color: "white"}}>Página de perfil /Profilepage (logged)</h2>
                 : <h2 style = {{ color: "white"}}>No logeado /Not logged in</h2>
                 // <h2>{loginText.loginStatusMessage.logged}</h2>
                 // : <h2>{loginText.loginStatusMessage.notLogged}</h2>
-            }
+            } */}
             <Box component="form"
                 onSubmit={(e)=> handleLogin(e)}
                 sx={{
@@ -169,7 +169,7 @@ const SignUpComponent = ({ language }) => {
                         <b>Welcome!</b>
                         {/* <b>{loginText.loginWindow.headLine1}</b> */}
                     </Typography>
-                    <Typography sx={{ color: "white" }} level="body-sm">Formulario de Alta</Typography>
+                    <Typography sx={{ color: "white" }} level="body-sm">Registration Form</Typography>
                 </div>
                 <FormControl>
                     <FormLabel sx={{ color: "white" }}>Nombre</FormLabel>
