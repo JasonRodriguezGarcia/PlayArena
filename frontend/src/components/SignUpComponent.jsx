@@ -17,7 +17,7 @@ import Option from '@mui/joy/Option';
 import { grey } from "@mui/material/colors";
 import { useEventCallback } from "@mui/material";
 
-const LoginComponent = ({ language }) => {
+const SignUpComponent = ({ language }) => {
 
     const [isValidToken, setIsValidToken] = useState(false)
     const [userName, setUserName] = useState("")
@@ -82,17 +82,13 @@ const LoginComponent = ({ language }) => {
                 )
                 const data = await response.json()
                 console.log("Respuesta backend: ", data)
-                if (data.result === "usuario o contraseña no válidos") {
+                if (data.message === "usuario o contraseña no válidos") {
                     setErrorMessage("usuario o contraseña no válidos")
                     setIsValidToken(false)
                     return
                 }
                 setIsValidToken(true)
-                setLogged(true)       
-                setUserNick(data.nick)
-                navigate('/')
-
-                // navigate(`/profile/${data.token}`);
+                navigate(`/profile/${data.token}`);
             } catch (error) {
                 // setError(error.message); // Handle errors
                 console.log(error.message)
@@ -197,20 +193,20 @@ const LoginComponent = ({ language }) => {
                         onChange={(e)=> handleUserPassword(e)}
                     />
                 </FormControl>
-                {/* <FormControl>
+                <FormControl>
                     <FormLabel sx={{ color: "white" }}>Nick</FormLabel>
                     <Input
                         // html input attribute
                         name="userNickInput"
                         type="text"
                         autoComplete="nickInput"
-                        placeholder="Nick (min. 5 caracteres)"
+                        placeholder="(min. 5 caracteres)"
                         onChange={(e)=> handleUserNickInput(e)}
                     />
-                </FormControl> */}
+                </FormControl>
 
-                <Button type="submit" id="boton1" name="login" sx={{ mt: 1 /* margin top */ }}>Login</Button>
-                {/* <Button type="submit" id="boton2" name="signup" sx={{ mt: 1 }}>SignUP</Button> */}
+                {/* <Button type="submit" id="boton1" name="login" sx={{ mt: 1 }}>Login</Button> */}
+                <Button type="submit" id="boton2" name="signup" sx={{ mt: 1 /* margin top */ }}>SignUP</Button>
 
                 {errorMessage && 
                 
@@ -229,4 +225,4 @@ const LoginComponent = ({ language }) => {
     )
 }
 
-export default LoginComponent
+export default SignUpComponent

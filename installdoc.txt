@@ -35,6 +35,8 @@ npm init -y
 npm install express cors
 npm install socket.io
 npm install  --save-dev nodemon
+npm install dotenv
+npm install mongodb
 
 cambiamos en package.json en scripts o añadimos linea nueva
 "dev": "nodemon index.js"
@@ -46,3 +48,13 @@ npm install react-router-dom
 ó
 npm install react-router-dom@6
 
+
+Metiendo a mano en mongodb interface web los datos en playarena/users
+{
+  "_id": {
+    "$oid": "686103001232c37846438d91"
+  },
+  "username": "Pepe",
+  "password": 123456,
+  "nick": "Pepeillo"
+}

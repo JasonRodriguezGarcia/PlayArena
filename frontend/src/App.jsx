@@ -5,23 +5,23 @@ import PlayArenaPage from './pages/PlayArenaPage'
 import MainPage from './pages/MainPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
-// import Test from './components/test'
-// import Test2 from './components/Test2'
+import LoginContext from './context/LoginContext';
 
 function App() {
-  const [count, setCount] = useState(0)
-
+    const [logged, setLogged] = useState(false);
+    const [userNick, setUserNick] = useState('')
   return (
     <>
-        {/* <PlayArena /> */}
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/game" element={<PlayArenaPage />} />      
-        <Route path="/signup" element={<SignUpPage />} />      
-        <Route path="/login" element={<LoginPage />} />      
-      </Routes>
-    </BrowserRouter>
+    <LoginContext.Provider value={{logged, setLogged, userNick, setUserNick}} >
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<MainPage />} />
+                <Route path="/game" element={<PlayArenaPage />} />      
+                <Route path="/signup" element={<SignUpPage />} />      
+                <Route path="/login" element={<LoginPage />} />      
+            </Routes>
+        </BrowserRouter>
+    </LoginContext.Provider>
     </>
   )
 }

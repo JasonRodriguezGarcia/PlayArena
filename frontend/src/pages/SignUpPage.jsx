@@ -14,7 +14,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import LoginComponent from '../components/LoginComponent';
+import SignUpLoginComponent from '../components/SignUpComponent';
 
 function SignUpPage() {
   
@@ -34,7 +34,7 @@ function SignUpPage() {
                 justifyContent: 'center',
             }}
         >
-            <LoginComponent />
+            <SignUpLoginComponent />
 
         </Box>
     </Box>

@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate , Link } from 'react-router-dom';
+import {createContext, useContext} from 'react';
+import LoginContext from '../context/LoginContext';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -22,7 +24,8 @@ const MenuBarComponent = () => {
   const navigate = useNavigate()
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
-  const [logged, setLogged] = useState(false)
+//   const [logged, setLogged] = useState(false)
+    const {logged, userNick} = useContext(LoginContext)
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -36,8 +39,9 @@ const MenuBarComponent = () => {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
+  const handleCloseUserMenu = (e) => {
       console.log("pulsado UserMenu!! ")
+      
     setAnchorElUser(null);
   };
 
@@ -56,8 +60,12 @@ const MenuBarComponent = () => {
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="/"
+            // component="a" <<-- Esto recarga toda la página y perdemos el estados
+            // href="/"   
+            component={Link} // usa Link
+            to="/" // en lugar de href
+
+
             sx={{
                 mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -110,8 +118,11 @@ const MenuBarComponent = () => {
           <Typography
             variant="h5"
             noWrap
-            component="a"
-            href="/"
+            // component="a"
+            // href="/"
+            component={Link} // usa Link
+            to="/" // en lugar de href
+
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -142,16 +153,17 @@ const MenuBarComponent = () => {
             <Tooltip title="Open settings">
                 <Box sx={{ display: "flex", alignItems: "center"}}>
                     <Box sx={{mx: 2}}>
-                        {/* User: Pepe */}
+                        {/* User */}
                         <Typography
                             variant="body1"
                             sx={{ mx: 2, color: 'white', fontWeight: 'bold', backgroundColor: '#1976d2', px: 1.5, py: 0.5, borderRadius: 1 }}
                         >
-                            User: Pepe
+                            User: {userNick}
                         </Typography>
                     </Box>
                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                        <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                        {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" /> */}
+                        <Avatar alt={userNick} src="/static/images/avatar/2.jpg" />
                     </IconButton>
                 </Box>
             </Tooltip>
@@ -172,7 +184,7 @@ const MenuBarComponent = () => {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem key={setting} onClick={(e)=> handleCloseUserMenu(e)}>
                   <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
                 </MenuItem>
               ))}
@@ -217,14 +229,14 @@ const MenuBarComponent = () => {
     >
         Ir a Game
     </Button>
-    <Button
+    {/* <Button
         onClick={()=> setLogged(!logged)}
         sx={{ width: { xs: '30%', sm: '100px' }, m: 2, color: 'white', display: 'block', "&:hover": {backgroundColor: 'lightgrey', color: "black"},
         "&:active": {backgroundColor: "grey"}
         }}
     >
         Act/des logged
-    </Button>
+    </Button> */}
 
     </AppBar>
 
