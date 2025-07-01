@@ -17,7 +17,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb'; // icono android
 import HomeIcon from '@mui/icons-material/Home'; // icono home
 
-const pages = ['Games', 'Pricing', 'About'];
+const pages = ['Games', 'Statistics', 'About'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 const MenuBarComponent = () => {
