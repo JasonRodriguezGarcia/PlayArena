@@ -73,7 +73,8 @@ const SignUpComponent = ({ language }) => {
                     password: userPassword
                 }
                 // fetch validate
-                const response = await fetch("http://localhost:5000/api/v1/playarena/login",
+                // const response = await fetch("http://localhost:5000/api/v1/playarena/login",
+                const response = await fetch(`${VITE_BACKEND_URL_RENDER}/api/v1/playarena/login`,
                     {
                         method: 'POST',
                         headers: {'Content-type': 'application/json; charset=UTF-8'},
@@ -105,7 +106,8 @@ const SignUpComponent = ({ language }) => {
                     // nick: userNick
                 }
                 // fetch validate
-                const response = await fetch("http://localhost:5000/api/v1/playarena/signup",
+                // const response = await fetch("http://localhost:5000/api/v1/playarena/signup",
+                const response = await fetch(`${VITE_BACKEND_URL_RENDER}/api/v1/playarena/signup`,
                     {
                         method: 'POST',
                         headers: {'Content-type': 'application/json; charset=UTF-8'},
