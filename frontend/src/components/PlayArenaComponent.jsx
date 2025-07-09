@@ -61,7 +61,6 @@ const PlayArenaComponent = () => {
     const [panelDisabled, setPanelDisabled] = useState(true)
     const [mensajeTurno, setMensajeTurno] = useState(['Su turno','Turno otro Jugador', ''])
     const [turno, setTurno] = useState(2)
-    // const [playerMark, setPlayerMark] = useState('')
     const [playerMark, setPlayerMark] = useState({})
     const [endGame, setEndGame] = useState(false)
     const [endGameMessage, setEndGameMessage] = useState('')
@@ -85,8 +84,13 @@ const PlayArenaComponent = () => {
         }
         
         const handleStartGame = (msg) => {
+            // aborting game if new player already in room (repeated player)
             if (msg.abortGame) {
                 setTextoComenzar(textoInicio[0])
+                setEndGameMessage('JUGADOR YA EN SALA !!')
+                setTimeout(() => {
+                    setEndGameMessage('')
+                }, 5000);
                 return
             }
             console.log('Connected to socket');
@@ -104,7 +108,7 @@ const PlayArenaComponent = () => {
                 return
             }
             // if (msg.players[0] == nick) {
-            if (msg.players[0] == userNick) {
+            if (msg.players[0].nick == userNick) {
                 setPlayerMark({mark: "X", color: "green"})
                 setTurno(0)
                 setPanelDisabled(false)
@@ -132,12 +136,9 @@ const PlayArenaComponent = () => {
                 setEndGameMessage(`Ganador Jugador ${playerMark.mark}`)
                 setEndGame(true)
                 setPanelDisabled(true)
-                // setWaiting(false)
                 setTextoComenzar(textoInicio[0])
-                console.log("pasa por aqui")
+                setGameRunning(false)
                 setTimeout(()=> {
-                    console.log("pasa tambien por aqui")
-                    setGameRunning(false) //
                     setEndGameMessage('')
                     handleReiniciarSala()
                 }, 5000)
@@ -169,7 +170,6 @@ const PlayArenaComponent = () => {
         )
         setEndGame(true)
         setGameRunning(false)
-        // setPlayerMark('')
         setPlayerMark({})
 
         setPanelDisabled(true)
@@ -417,9 +417,9 @@ const PlayArenaComponent = () => {
                 <Typography data-testid="gameTurn-h5" variant="h5" component="div" 
                     sx={{margin: "0 0 1 0",  color: "white"}}
                 >
-                    {!endGame ? mensajeTurno[turno] : null}
-                    {endGame ? endGameMessage: null}
-                    {/* {!endGame ? mensajeTurno[turno] : endGameMessage} */}
+                    {/* {!endGame ? mensajeTurno[turno] : null}
+                    {endGame ? endGameMessage: null} */}
+                    {!endGame ? mensajeTurno[turno] : endGameMessage}
                 </Typography>
             </Box>
         </Box>

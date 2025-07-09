@@ -63,96 +63,108 @@ async function startServer() {
 
             // Setup Socket.IO server on the same HTTP server
             const io = new SocketIOServer(httpServer, {
-            cors: {
-                origin: "*", // adjust for your frontend origin
-            },
+                cors: {
+                    origin: "*", // adjust for your frontend origin
+                },
             });
 
             io.on("connection", (socket) => {
 
-            socket.on ("joinRoom", (room) => {
-                // console.log(`Socket ${socket.id} has joined ${room}`);
-                // socket.join(room);
-            });
+                socket.on ("joinRoom", (room) => {
+                    // console.log(`Socket ${socket.id} has joined ${room}`);
+                    // socket.join(room);
+                });
 
-            socket.on('clearRoom', async ({room})=> {
-                const buscarSala = games.findIndex(game => game.sala == room)
-                if (games.findIndex(game => game.sala == room) != -1) {
+                socket.on('clearRoom', async ({room})=> {
+                    const buscarSala = games.findIndex(game => game.sala == room)
+                    if (games.findIndex(game => game.sala == room) != -1) {
+                        // borra sala actual
+                        games.splice(buscarSala, 1)
+                        console.log("Room en backend clearRoom: ", room)
+                        console.log("Games: ", games)
+                        console.log("Room cleared: ", room)
+                        // enviar a todos los de sala el comienzo del juego y también playerMark para el 2º jugador
+                        // Enviando a todos que la sala se a borrado
+                        io.to(room).emit('clearRoom')
 
-                    games.splice(buscarSala, 1)
-                    console.log("Room en backend clearRoom: ", room)
-                    console.log("Games: ", games)
-                    console.log("Room cleared: ", room)
-                    // enviar a todos los de sala el comienzo del juego y también playerMark para el 2º jugador
-                    io.to(room).emit('clearRoom')
+                    } else {
+                        console.log("Room already empty")
+                    }
+                })
 
-                } else {
-                    console.log("Room already empty")
-                }
-            })
+                socket.on('startGame', async ({room, nick})=> {
+                    console.log(`Socket ${socket.id} has joined ${room}`);
+                    socket.join(room);
+                    let startGame = false // creado startgame para cuando se juege contra el ordenador
+                    let waiting
+                    let playerMark
+                    const buscarSala = games.find(game => game.sala == room)
+                    console.log("buscarsala: ", buscarSala)
+                    if ( buscarSala === undefined) { // Sala no existente
+                        const nuevaSala = tablero3enRaya(room)
+                        nuevaSala.sala = room
+                        console.log("Creada objeto nuevaSala: ", nuevaSala)
+                        nuevaSala.players.push({nick: nick, socketId: socket.id})
+                        games.push(nuevaSala)
+                        waiting = true
+                        playerMark = "X" // Es el primer jugado de la sala recien creada
+                        socket.emit('startGame', {waiting: waiting, playerMark: playerMark});
 
-            socket.on('startGame', async ({room, nick})=> {
-                console.log(`Socket ${socket.id} has joined ${room}`);
-                socket.join(room);
-                let startGame = false // creado startgame para cuando se juege contra el ordenador
-                let waiting
-                let playerMark
-                const buscarSala = games.find(game => game.sala == room)
-                console.log("buscarsala: ", buscarSala)
-                if ( buscarSala === undefined) { // Sala no existente
-                    const nuevaSala = tablero3enRaya(room)
-                    nuevaSala.sala = room
-                    console.log("Creada objeto nuevaSala: ", nuevaSala)
-                    nuevaSala.players.push(nick)
-                    games.push(nuevaSala)
-                    waiting = true
-                    playerMark = "X" // Es el primer jugado de la sala recien creada
-                    socket.emit('startGame', {waiting: waiting, playerMark: playerMark});
+                    } else 
+                    // hay ya una sala con jugador y el nuevo no esta repetido
+                    // if (buscarSala.players.length < 2 && !buscarSala.players.includes(nick)) { // hay ya una sala con jugador y el nuevo no esta repetido
+                    if (buscarSala.players.length < 2 && !buscarSala.players.find(player => player.nick == nick)) { // hay ya una sala con jugador y el nuevo no esta repetido
+                        buscarSala.players.push({nick: nick, socketId: socket.id})
+                        console.log("imprimo objeto nuevaSala ya existente: ", buscarSala)
+                        waiting = false
+                        playerMark = "O"
+                        startGame = true
+                        io.to(room).emit('startGame', {startGame: startGame, players: buscarSala.players})
+                    } 
+                    else {
+                        socket.emit('startGame', {startGame: false, abortGame: true, playerMark: playerMark});
+                    }
 
-                } else 
-                // hay ya una sala con jugador y el nuevo no esta repetido
-                if (buscarSala.players.length < 2 && !buscarSala.players.includes(nick)) { // hay ya una sala con jugador y el nuevo no esta repetido
-                    buscarSala.players.push(nick)
-                    console.log("imprimo objeto nuevaSala ya existente: ", buscarSala)
-                    waiting = false
-                    playerMark = "O"
-                    startGame = true
-                    io.to(room).emit('startGame', {startGame: startGame, players: buscarSala.players})
-                } 
-                else {
-                    console.log("paso por aqui")
-                    socket.emit('startGame', {startGame: false, abortGame: true, playerMark: playerMark});
-                }
+                    console.log("games: ", games)
+                    console.log("players: ", JSON.stringify(games))
+                })
 
-                console.log("games: ", games)
-            })
+                socket.on('playerMovement', async ({room, message, turn, nick, timestamp})=> {
+                    console.log("receiving: ", room, " - Celda ", message, nick);
+                    const row = Math.floor(message / 3)
+                    const col = message % 3
+                    const tableroJuego = games.find(game => game.sala === room)
+                    const {turno, board} = tableroJuego
+                    if (board[row][col] !== '') {
+                        return; // celda ocupada
+                    }
+                    const mark = turno === 0 ? {mark: "X", color: "green"}: {mark: "O", color: "red"}
+                    board[row][col] = mark.mark
+                    tableroJuego.turno = 1 - tableroJuego.turno
+                    console.log("imprimo tableroJuego: ", JSON.stringify(tableroJuego))
+                    const repliedMessage = { cell: message, mark, playedTurn: turn}
+                    console.log("sending: ", repliedMessage)
+                    // envia a todos los de la sala a excepcion del emisor
+                    // socket.to(room).emit('playerMovement', {repliedMessage, nick});
+                    // envia a todos los de la sala incluido el emisor
+                    io.to(room).emit('playerMovement', {repliedMessage, nick});
 
-            socket.on('playerMovement', async ({room, message, turn, nick, timestamp})=> {
-                console.log("receiving: ", room, " - Celda ", message, nick);
-                const row = Math.floor(message / 3)
-                const col = message % 3
-                const tableroJuego = games.find(game => game.sala === room)
-                const {turno, board} = tableroJuego
-                if (board[row][col] !== '') {
-                    return; // celda ocupada
-                }
-                const mark = turno === 0 ? {mark: "X", color: "green"}: {mark: "O", color: "red"}
-                board[row][col] = mark.mark
-                tableroJuego.turno = 1 - tableroJuego.turno
-                console.log("imprimo tableroJuego: ", JSON.stringify(tableroJuego))
-                const repliedMessage = { cell: message, mark, playedTurn: turn}
-                console.log("sending: ", repliedMessage)
-                // envia a todos los de la sala a excepcion del emisor
-                // socket.to(room).emit('playerMovement', {repliedMessage, nick});
-                // envia a todos los de la sala incluido el emisor
-                io.to(room).emit('playerMovement', {repliedMessage, nick});
+                })
 
-            }
-            );
+                socket.on("disconnect", (reason) => {
+                    console.log(`User disconnected ${socket.id} and ${reason}`)
+                    const result = games.find(game =>
+                        game.players.some(player => player.socketId === socket.id)
+                    );
+                    console.log("Imprimo result: ", result)
+                    if (result != undefined) {
+                        // Solo pasa por aqui si el jugador ya estaba jugando
+                        // Enviando a todos que la sala se a borrado
+                        io.to(result.sala).emit('clearRoom')
+                    }
 
-            socket.on("disconnect", (reason) => {
-                console.log(`User disconnected ${socket.id} and ${reason}`)
-            })
+
+                })
             })
         }
 

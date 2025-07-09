@@ -26,9 +26,6 @@ const SignUpComponent = ({ language }) => {
     // const [userNick, setUserNick] = useState("")
     const {logged, setLogged, userNick, setUserNick} = useContext(LoginContext)
     const [errorMessage, setErrorMessage] = useState("")
-    // const [languageSet, setLanguageSet] = useState("")
-
-    // const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     
     // useEffect(()=> {
@@ -103,7 +100,6 @@ const SignUpComponent = ({ language }) => {
                     username: userName,
                     password: userPassword,
                     nick: userNickInput
-                    // nick: userNick
                 }
                 // fetch validate
                 // const response = await fetch("http://localhost:5000/api/v1/playarena/signup",
