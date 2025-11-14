@@ -18,6 +18,7 @@ import { grey } from "@mui/material/colors";
 import { useEventCallback } from "@mui/material";
 
 const SignUpComponent = ({ language }) => {
+    const VITE_BACKEND_URL_RENDER = import.meta.env.VITE_BACKEND_URL_RENDER
 
     const [isValidToken, setIsValidToken] = useState(false)
     const [userName, setUserName] = useState("")
