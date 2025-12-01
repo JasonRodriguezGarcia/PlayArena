@@ -65,5 +65,11 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ✅ Endpoint de salud básico (para Render / UptimeRobot-pending)
+// Usaremos este Endpoint para que el backend en Render que es gratuíto no entre en stand-by
+router.get("/health", (req, res) => {
+    console.log("Llamando a Health para no entrar en stand-by...")
+    res.status(200).send("OK")
+})
 
 export default router;
